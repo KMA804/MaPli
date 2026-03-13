@@ -12,93 +12,26 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import dj_database_url  # Nouvel import pour Render
 from django.utils.translation import gettext_lazy as _
-
-
-# settings.py - Ajouter ces configurations
-AUTH_USER_MODEL = 'mapli.CustomUser'  # Remplacez 'mapli' par le nom de votre app
-
-# settings.py
-LOGIN_URL = 'index'  # Redirige vers la page de connexion
-LOGIN_REDIRECT_URL = 'home'  # Après connexion, va à la page d'accueil
-LOGOUT_REDIRECT_URL = 'index'  # Après déconnexion, va à la page de connexion
-
-
-
-# settings.py - Configuration pour développement
-# settings.py
-#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Ou votre serveur SMTP
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'kanakimanamarieange8@gmail.com'  # REMPLACEZ
-EMAIL_HOST_PASSWORD = 'Ange@2222'  # REMPLACEZ
-DEFAULT_FROM_EMAIL = 'noreply@meditrust.maternite'
-
-# Pour tester sans vrai SMTP, utilisez la console :
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-import os
-
-
-# Optionnel: Si vous voulez utiliser Google Cloud Translation API
-# GOOGLE_TRANSLATE_API_KEY = 'votre_cle_api_ici'
-
-# Middleware de traduction (AJOUTEZ à votre liste existante)
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.locale.LocaleMiddleware',  # IMPORTANT pour i18n
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-]
-
-# Configuration du cache pour les traductions
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'unique-snowflake',
-    }
-}
-
-# settings.py
-AUTH_USER_MODEL = 'mapli.CustomUser'
-
-# CORRIGEZ CES LIGNES :
-LOGIN_URL = 'index'  # Changez 'login' en 'index'
-LOGIN_REDIRECT_URL = 'home'  
-LOGOUT_REDIRECT_URL = 'index'
-
-# Fichiers de traduction Django
-LOCALE_PATHS = [
-    os.path.join(BASE_DIR, 'locale'),
-]
-
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-*i9hh9s&rc%s0c2ckz7yz5xre32br#^l1^x$fo2#$)wi4jgf%@'
+# Utilise une variable d'environnement pour la clé secrète en production
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-*i9hh9s&rc%s0c2ckz7yz5xre32br#^l1^x$fo2#$)wi4jgf%@')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True  
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = []
-
+# Configuration des hôtes autorisés
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.onrender.com']
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -106,14 +39,26 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'mapli',  #  app
-    'rest_framework',  # If you're using Django REST Framework
-    'corsheaders',  # If you're using CORS headers
+    # Applications tierces
+    'rest_framework',
+    'corsheaders',
     'xhtml2pdf',
+    # Votre application
+    'mapli',
 ]
 
-# settings.py
- 
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # AJOUTÉ - Important pour les fichiers statiques
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
 ROOT_URLCONF = 'mere.urls'
 
 TEMPLATES = [
@@ -134,28 +79,34 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mere.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',  
-        'NAME': 'Mawe',  
-        'USER': 'root',  
-        'PASSWORD': '',  
-        'HOST': '127.0.0.1',  
-        'PORT': '3306',  
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+# Configuration pour Render avec PostgreSQL
+# En local, utilise la configuration PostgreSQL normale
+if os.environ.get('DATABASE_URL'):
+    # Mode production (Render)
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+else:
+    # Mode développement local
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'Mawe',
+            'USER': 'postgres',
+            'PASSWORD': 'Ange@2222',
+            'HOST': 'localhost',
+            'PORT': '5432',
         }
     }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -171,36 +122,76 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
+# Fichiers de traduction Django
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+# Configuration du cache pour les traductions
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Configuration WhiteNoise pour les fichiers statiques en production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-# settings.py
+
+# Configuration utilisateur personnalisé
+AUTH_USER_MODEL = 'mapli.CustomUser'
+
+# Configuration des URLs de redirection
+LOGIN_URL = 'index'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'index'
+
+# Configuration Email
+if DEBUG:
+    # En développement : affiche les emails dans la console
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # En production : utilise un serveur SMTP
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@meditrust.maternite')
+
+# Security settings for production
+if not DEBUG:
+    # Sécurité HTTPS
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000  # 1 an
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True

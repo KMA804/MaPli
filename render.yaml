@@ -1,0 +1,28 @@
+databases:
+  - name: mere-db
+    plan: free
+    databaseName: mere
+    user: mere_user
+
+services:
+  - type: web
+    name: mampli
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn mere.wsgi"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mere-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: EMAIL_HOST_USER
+        value: "kanakimanamarieange8@gmail.com"
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        value: "noreply@meditrust.maternite"
