@@ -1,0 +1,33 @@
+<!-- templates/mapli/welcome_redirect.html -->
+{% extends 'mapli/base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+<div class="container-fluid vh-100 d-flex align-items-center justify-content-center dark-background">
+    <div class="text-center text-white" data-aos="fade-up">
+        <h1 class="display-4 mb-4">{% trans "Bienvenue sur MaPli" %}</h1>
+        <p class="lead mb-4">{% trans "Votre compagnon de grossesse intelligent" %}</p>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="ai-welcome-card p-4 rounded bg-dark">
+                    <i class="bi bi-robot display-1 text-primary mb-3"></i>
+                    <h3>{% trans "Reconnaissance linguistique activée" %}</h3>
+                    <p class="mb-4">{% trans "MaPli détecte automatiquement votre langue préférée pour une expérience
+                        personnalisée" %}</p>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'patient_login' %}" class="btn btn-primary btn-lg">
+                            {% trans "Se connecter" %}
+                        </a>
+                        <a href="{% url 'patient_register' %}" class="btn btn-outline-light btn-lg">
+                            {% trans "Créer un compte" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

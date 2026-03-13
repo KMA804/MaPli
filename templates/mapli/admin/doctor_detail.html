@@ -1,0 +1,142 @@
+<!-- templates/mapli/admin/doctor_detail.html -->
+{% extends 'mapli/adabas.html' %}
+{% load static %}
+
+{% block title %}Détail - Dr. {{ doctor.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="{% url 'admin_doctors_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-person-badge fs-1 text-warning"></i>
+                    </div>
+                    <h4 class="mb-1">Dr. {{ doctor.name }}</h4>
+                    <p class="text-muted mb-2">{{ doctor.speciality.name }}</p>
+                    
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        {% if doctor.is_active %}
+                            <span class="badge bg-success">Actif</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactif</span>
+                        {% endif %}
+                        
+                        {% if doctor.verified_at %}
+                            <span class="badge bg-info">Vérifié</span>
+                        {% else %}
+                            <span class="badge bg-warning">Non vérifié</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-warning" onclick="toggleDoctor({{ doctor.id }})">
+                            <i class="bi bi-toggle-on me-2"></i>
+                            {% if doctor.is_active %}Désactiver{% else %}Activer{% endif %}
+                        </button>
+                        <button class="btn btn-outline-success" onclick="verifyDoctor({{ doctor.id }})">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Vérifier
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Informations professionnelles</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th style="width: 150px;">Hôpital:</th>
+                            <td>
+                                <a href="{% url 'admin_hospital_detail' doctor.hospital.id %}">
+                                    {{ doctor.hospital.name }}
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Spécialité:</th>
+                            <td>{{ doctor.speciality.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Adresse:</th>
+                            <td>{{ doctor.address }}</td>
+                        </tr>
+                        <tr>
+                            <th>Téléphone:</th>
+                            <td><a href="tel:{{ doctor.phone_number }}">{{ doctor.phone_number }}</a></td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td><a href="mailto:{{ doctor.email }}">{{ doctor.email }}</a></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            {% if doctor.user_account %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Compte utilisateur associé</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th style="width: 150px;">Nom d'utilisateur:</th>
+                            <td>{{ doctor.user_account.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ doctor.user_account.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date d'inscription:</th>
+                            <td>{{ doctor.user_account.date_joined|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Dernière connexion:</th>
+                            <td>{{ doctor.user_account.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDoctor(id) {
+        if(confirm('{% if doctor.is_active %}Désactiver{% else %}Activer{% endif %} ce médecin ?')) {
+            fetch(`/gestion/doctors/${id}/toggle/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'}
+            }).then(response => {
+                if(response.ok) location.reload();
+            });
+        }
+    }
+
+    function verifyDoctor(id) {
+        if(confirm('Vérifier ce médecin ?')) {
+            fetch(`/gestion/doctors/${id}/verify/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'}
+            }).then(response => {
+                if(response.ok) location.reload();
+            });
+        }
+    }
+</script>
+{% endblock %}

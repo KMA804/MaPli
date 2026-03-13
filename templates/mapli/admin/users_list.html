@@ -1,0 +1,165 @@
+<!-- templates/mapli/admin/users_list.html -->
+{% extends 'mapli/adabas.html' %}
+{% load static %}
+
+{% block title %}Gestion des utilisateurs - MaPli{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">
+            <i class="bi bi-people-fill me-2"></i>
+            Gestion des utilisateurs
+        </h1>
+        <div>
+            <span class="text-muted me-3">
+                Total: <strong>{{ users|length }}</strong> utilisateurs
+            </span>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Filtrer par rôle</label>
+                    <select name="role" class="form-select">
+                        <option value="">Tous les rôles</option>
+                        <option value="patient" {% if current_role == 'patient' %}selected{% endif %}>Patient</option>
+                        <option value="hopital" {% if current_role == 'hopital' %}selected{% endif %}>Hôpital</option>
+                        <option value="medecin" {% if current_role == 'medecin' %}selected{% endif %}>Médecin</option>
+                        <option value="admin_systeme" {% if current_role == 'admin_systeme' %}selected{% endif %}>Admin
+                            système</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Filtrer par statut</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="active" {% if current_status == 'active' %}selected{% endif %}>Actifs</option>
+                        <option value="inactive" {% if current_status == 'inactive' %}selected{% endif %}>Inactifs
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Recherche</label>
+                    <input type="text" name="search" class="form-control" placeholder="Nom, email, username..."
+                        value="{{ search_query }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste des utilisateurs -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Utilisateur</th>
+                            <th>Contact</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th>Inscription</th>
+                            <th>Dernière connexion</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user_item in users %}
+                        <tr>
+                            <td><span class="badge bg-secondary">#{{ user_item.id }}</span></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-circle fs-3 me-3"></i>
+                                    <div>
+                                        <strong>{{ user_item.first_name }} {{ user_item.last_name }}</strong><br>
+                                        <small class="text-muted">@{{ user_item.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>
+                                    <i class="bi bi-envelope me-1"></i> {{ user_item.email }}<br>
+                                    <small><i class="bi bi-telephone me-1"></i> {{ user_item.phone_number|default:"-" }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge 
+                                    {% if user_item.role == 'admin_systeme' %}bg-danger
+                                    {% elif user_item.role == 'hopital' %}bg-success
+                                    {% elif user_item.role == 'medecin' %}bg-warning
+                                    {% else %}bg-primary{% endif %}">
+                                    {% if user_item.role == 'admin_systeme' %}Admin Système
+                                    {% elif user_item.role == 'hopital' %}Hôpital
+                                    {% elif user_item.role == 'medecin' %}Médecin
+                                    {% else %}Patient{% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if user_item.is_active %}
+                                <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user_item.date_joined|date:"d/m/Y" }}</td>
+                            <td>{{ user_item.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'admin_user_detail' user_item.id %}" class="btn btn-outline-primary"
+                                        title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <button class="btn btn-outline-warning" onclick=`toggleUser({{ user_item.id }})`
+                                        title="Activer/Désactiver">
+                                        <i class="bi bi-toggle-on"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <i class="bi bi-people fs-1 text-muted d-block mb-3"></i>
+                                <p class="text-muted mb-0">Aucun utilisateur trouvé</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleUser(userId) {
+        if (confirm('Activer/Désactiver cet utilisateur ?')) {
+            fetch(`/gestion/users/${userId}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Erreur lors de l\'opération');
+                }
+            }).catch(error => {
+                alert('Erreur de connexion');
+            });
+        }
+    }
+</script>
+{% endblock %}

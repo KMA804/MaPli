@@ -1,0 +1,75 @@
+<!-- templates/mapli/admin/log_detail.html -->
+{% extends 'mapli/adabas.html' %}
+{% load static %}
+
+{% block title %}Détail du journal - MaPli{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="{% url 'admin_logs' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-2"></i>Retour aux journaux
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3">
+            <h5 class="mb-0">
+                <i class="bi bi-journal-text me-2"></i>
+                Détail du journal #{{ log.id }}
+            </h5>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <tr>
+                    <th style="width: 150px;">Date/Heure:</th>
+                    <td>{{ log.created_at|date:"d/m/Y H:i:s" }}</td>
+                </tr>
+                <tr>
+                    <th>Utilisateur:</th>
+                    <td>
+                        {% if log.user %}
+                        {{ log.user.username }} ({{ log.user.email }})
+                        {% else %}
+                        <em>Système</em>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>Type d'action:</th>
+                    <td>
+                        <span class="badge 
+                            {% if log.action_type == 'login' %}bg-success
+                            {% elif log.action_type == 'logout' %}bg-secondary
+                            {% elif log.action_type == 'user_create' %}bg-primary
+                            {% elif log.action_type == 'user_delete' %}bg-danger
+                            {% else %}bg-info{% endif %}">
+                            {{ log.get_action_type_display }}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Description:</th>
+                    <td>{{ log.description }}</td>
+                </tr>
+                <tr>
+                    <th>Adresse IP:</th>
+                    <td>{{ log.ip_address|default:"-" }}</td>
+                </tr>
+                <tr>
+                    <th>User Agent:</th>
+                    <td><small class="text-muted">{{ log.user_agent|default:"-" }}</small></td>
+                </tr>
+                {% if log.details %}
+                <tr>
+                    <th>Détails supplémentaires:</th>
+                    <td>
+                        <pre class="bg-light p-3 rounded"><code>{{ log.details|pprint }}</code></pre>
+                    </td>
+                </tr>
+                {% endif %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

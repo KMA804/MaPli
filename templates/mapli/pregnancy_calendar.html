@@ -1,0 +1,673 @@
+{% extends 'mapli/base.html' %}
+{% load static %}
+
+{% block title %}Calendrier de grossesse - MaPli{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-gradient-primary position-relative overflow-hidden">
+    <div class="container position-relative z-1">
+        <div class="breadcrumbs">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'home' %}" class="text-white-50">
+                            <i class="bi bi-house"></i> Accueil
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'dashboard' %}" class="text-white-50">Tableau de bord</a>
+                    </li>
+                    <li class="breadcrumb-item active text-white" aria-current="page">Calendrier de grossesse</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="title-wrapper text-center text-white py-4">
+            <h1 class="display-5 fw-bold mb-3 animate__animated animate__fadeInDown">
+                Calendrier de grossesse
+            </h1>
+            <p class="lead opacity-90 animate__animated animate__fadeInUp animate__delay-1s">
+                Suivez semaine après semaine l'évolution de votre grossesse
+            </p>
+        </div>
+    </div>
+    <div class="wave-divider">
+        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+            <path
+                d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z"
+                class="shape-fill"></path>
+        </svg>
+    </div>
+</section>
+
+<!-- Main Content -->
+<section class="calendar-section py-5 bg-light">
+    <div class="container">
+        <!-- En-tête du calendrier avec progression -->
+        <div class="calendar-header mb-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="current-week-card bg-white rounded-4 shadow-sm p-4">
+                        <div class="d-flex align-items-center flex-wrap gap-4">
+                            <div class="week-indicator">
+                                <span class="week-label">Semaine en cours</span>
+                                <h2 class="week-number display-4 fw-bold text-gradient-primary mb-0"
+                                    id="currentWeekDisplay">
+                                    {{ current_week }}
+                                </h2>
+                            </div>
+                            <div class="progress-info flex-grow-1">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Progression</span>
+                                    <span class="fw-bold text-primary">{{ progress_percentage|floatformat:1 }}%</span>
+                                </div>
+                                <div class="progress" style="height: 12px;">
+                                    <div class="progress-bar bg-gradient-primary" role="progressbar"
+                                        
+                                        aria-valuenow="{{ progress_percentage }}" aria-valuemin="0" aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-muted">Semaine 1</small>
+                                    <small class="text-muted">Semaine 42</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="due-date-card bg-white rounded-4 shadow-sm p-4">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle bg-primary-soft me-3">
+                                <i class="bi bi-calendar-heart text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted">Date prévue d'accouchement</small>
+                                <h5 class="mb-0 fw-bold">{{ due_date|date:"d F Y"|default:"Non définie" }}</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contrôle de mise à jour de la semaine -->
+        <div class="update-week-card mb-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="mb-2">
+                                <i class="bi bi-arrow-repeat text-primary me-2"></i>
+                                Mettre à jour votre semaine de grossesse
+                            </h5>
+                            <p class="text-muted mb-md-0">
+                                Si vous avez dépassé la semaine indiquée, mettez à jour votre calendrier pour continuer
+                                à suivre l'évolution.
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex gap-2 justify-content-md-end">
+                                <input type="number" class="form-control" id="weekInput" min="1" max="42"
+                                    value="{{ current_week }}" style="width: 100px;">
+                                <button class="btn btn-primary" id="updateWeekBtn">
+                                    <i class="bi bi-check-lg me-1"></i> Mettre à jour
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Légende du calendrier -->
+        <div class="calendar-legend mb-4">
+            <div class="d-flex flex-wrap gap-3">
+                <span class="legend-item">
+                    <span class="legend-dot bg-success"></span> Semaine en cours
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot bg-primary"></span> Semaine passée
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot bg-warning"></span> Rendez-vous programmé
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot bg-info"></span> Jalon important
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot bg-secondary"></span> Semaine à venir
+                </span>
+            </div>
+        </div>
+
+        <!-- Calendrier sous forme de tableau -->
+        <div class="calendar-table-container bg-white rounded-4 shadow-sm p-4 mb-5">
+            <div class="table-responsive">
+                <table class="table table-hover calendar-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" width="80">Semaine</th>
+                            <th scope="col" width="120">Trimestre</th>
+                            <th scope="col" width="150">Dates</th>
+                            <th scope="col">Développement du bébé</th>
+                            <th scope="col" width="120">Taille/Poids</th>
+                            <th scope="col" width="150">Jalons</th>
+                            <th scope="col" width="120">Rendez-vous</th>
+                            <th scope="col" width="100">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for week_data in weeks_data %}
+                        <tr class="{% if week_data.is_current %}table-current-week{% endif %} 
+                                   {% if week_data.entry.is_completed %}table-completed{% endif %}"
+                            data-week="{{ week_data.week }}">
+                            <td>
+                                <span class="fw-bold">Semaine {{ week_data.week }}</span>
+                                {% if week_data.is_current %}
+                                <span class="badge bg-success ms-1">En cours</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if week_data.week <= 13 %} <span class="badge bg-primary-soft text-primary">1er
+                                    trimestre</span>
+                                    {% elif week_data.week <= 26 %} <span class="badge bg-success-soft text-success">
+                                        2ème trimestre</span>
+                                        {% else %}
+                                        <span class="badge bg-warning-soft text-warning">3ème trimestre</span>
+                                        {% endif %}
+                            </td>
+                            <td>
+                                {% if week_data.entry.start_date %}
+                                <small>
+                                    {{ week_data.entry.start_date|date:"d/m" }} -
+                                    {{ week_data.entry.end_date|date:"d/m" }}
+                                </small>
+                                {% else %}
+                                <small class="text-muted">Non définie</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if week_data.entry.baby_development %}
+                                <small>{{ week_data.entry.baby_development|truncatechars:60 }}</small>
+                                {% else %}
+                                <div class="development-placeholder">
+                                    <a href="{% url 'week_detail' week_data.week %}" class="text-decoration-none small">
+                                        <i class="bi bi-plus-circle me-1"></i> Voir détails
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if week_data.entry.baby_size or week_data.entry.baby_weight %}
+                                <small>
+                                    {% if week_data.entry.baby_size %}{{ week_data.entry.baby_size }}{% endif %}
+                                    {% if week_data.entry.baby_weight %}<br>{{ week_data.entry.baby_weight }}{% endif %}
+                                </small>
+                                {% else %}
+                                <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if week_data.milestones %}
+                                <div class="milestone-indicator" data-bs-toggle="tooltip"
+                                    title="{% for m in week_data.milestones %}{{ m.title }}{% if not forloop.last %}, {% endif %}{% endfor %}">
+                                    <span class="badge bg-info-soft text-info">
+                                        <i class="bi bi-star-fill me-1"></i>{{ week_data.milestones|length }}
+                                    </span>
+                                </div>
+                                {% else %}
+                                <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if week_data.has_appointments %}
+                                <span class="badge bg-warning-soft text-warning">
+                                    <i class="bi bi-calendar-check me-1"></i>
+                                    {{ week_data.appointments|length }}
+                                </span>
+                                {% else %}
+                                <span class="text-muted small">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if week_data.is_past %}
+                                <span class="badge bg-secondary-soft text-secondary">Passée</span>
+                                {% elif week_data.is_current %}
+                                <span class="badge bg-success-soft text-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-light text-muted">À venir</span>
+                                {% endif %}
+
+                                {% if week_data.entry.is_completed %}
+                                <i class="bi bi-check-circle-fill text-success ms-1" data-bs-toggle="tooltip"
+                                    title="Semaine complétée"></i>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Section des symptômes récents et tâches -->
+        <div class="row g-4">
+            <!-- Symptômes récents -->
+            <div class="col-lg-6">
+                <div class="symptoms-card bg-white rounded-4 shadow-sm p-4">
+                    <h5 class="mb-3">
+                        <i class="bi bi-activity text-primary me-2"></i>
+                        Symptômes de la semaine {{ current_week }}
+                    </h5>
+
+                    {% if recent_symptoms %}
+                    <div class="symptoms-list mb-3">
+                        {% for symptom in recent_symptoms %}
+                        <div class="symptom-item d-flex justify-content-between align-items-center py-2 border-bottom">
+                            <div>
+                                <span
+                                    class="badge {% if symptom.severity == 3 %}bg-danger{% elif symptom.severity == 2 %}bg-warning{% else %}bg-success{% endif %} me-2">
+                                    {{ symptom.get_severity_display }}
+                                </span>
+                                <span>{{ symptom.get_symptom_type_display }}</span>
+                            </div>
+                            <small class="text-muted">{{ symptom.date|date:"d/m" }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">
+                        Aucun symptôme enregistré cette semaine
+                    </p>
+                    {% endif %}
+
+                    <button class="btn btn-outline-primary btn-sm w-100" data-bs-toggle="modal"
+                        data-bs-target="#addSymptomModal">
+                        <i class="bi bi-plus-circle me-1"></i> Ajouter un symptôme
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tâches à venir -->
+            <div class="col-lg-6">
+                <div class="tasks-card bg-white rounded-4 shadow-sm p-4">
+                    <h5 class="mb-3">
+                        <i class="bi bi-check2-square text-primary me-2"></i>
+                        Tâches pour les semaines à venir
+                    </h5>
+
+                    {% if upcoming_tasks %}
+                    <div class="tasks-list">
+                        {% for task in upcoming_tasks %}
+                        <div class="task-item d-flex align-items-center py-2 border-bottom">
+                            <div class="form-check">
+                                <input class="form-check-input task-checkbox" type="checkbox"
+                                    data-task-id="{{ task.id }}" {% if task.is_done %}checked{% endif %}>
+                            </div>
+                            <div class="ms-2 flex-grow-1">
+                                <span class="{% if task.is_done %}text-decoration-line-through text-muted{% endif %}">
+                                    {{ task.task }}
+                                </span>
+                                <small class="text-muted ms-2">Semaine {{ task.week_number }}</small>
+                            </div>
+                            <span class="badge bg-light text-dark">{{ task.category }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center py-3">
+                        Aucune tâche prévue
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal Ajout Symptôme -->
+<div class="modal fade" id="addSymptomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter un symptôme</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="symptomForm">
+                    <div class="mb-3">
+                        <label class="form-label">Semaine</label>
+                        <input type="number" class="form-control" name="week_number" value="{{ current_week }}"
+                            readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type de symptôme</label>
+                        <select class="form-select" name="symptom_type" required>
+                            <option value="nausea">Nausées</option>
+                            <option value="fatigue">Fatigue</option>
+                            <option value="back_pain">Maux de dos</option>
+                            <option value="headache">Maux de tête</option>
+                            <option value="swelling">Gonflements</option>
+                            <option value="cravings">Envie alimentaire</option>
+                            <option value="other">Autre</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Intensité</label>
+                        <select class="form-select" name="severity">
+                            <option value="1">Léger</option>
+                            <option value="2">Modéré</option>
+                            <option value="3">Intense</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description (optionnelle)</label>
+                        <textarea class="form-control" name="description" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="saveSymptomBtn">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    :root {
+        --primary: #4e54c8;
+        --primary-light: #8f94fb;
+        --success: #2ecc71;
+        --warning: #f39c12;
+        --danger: #e74c3c;
+        --info: #3498db;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        min-height: 200px;
+    }
+
+    .wave-divider {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        overflow: hidden;
+        line-height: 0;
+    }
+
+    .wave-divider svg {
+        position: relative;
+        display: block;
+        width: calc(100% + 1.3px);
+        height: 50px;
+    }
+
+    .wave-divider .shape-fill {
+        fill: #f8f9fa;
+    }
+
+    /* Calendar Table */
+    .calendar-table {
+        font-size: 0.9rem;
+    }
+
+    .calendar-table thead th {
+        background-color: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+        color: #495057;
+        font-weight: 600;
+    }
+
+    .calendar-table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .calendar-table tbody tr:hover {
+        background-color: rgba(78, 84, 200, 0.05);
+    }
+
+    .table-current-week {
+        background-color: rgba(46, 204, 113, 0.1);
+        border-left: 4px solid var(--success);
+    }
+
+    .table-completed {
+        opacity: 0.8;
+    }
+
+    /* Week Indicator */
+    .week-indicator {
+        text-align: center;
+        min-width: 120px;
+    }
+
+    .week-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .week-number {
+        line-height: 1;
+        margin-top: -5px;
+    }
+
+    /* Legend */
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+    }
+
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    /* Badges */
+    .bg-primary-soft {
+        background: rgba(78, 84, 200, 0.1);
+    }
+
+    .bg-success-soft {
+        background: rgba(46, 204, 113, 0.1);
+    }
+
+    .bg-warning-soft {
+        background: rgba(243, 156, 18, 0.1);
+    }
+
+    .bg-info-soft {
+        background: rgba(52, 152, 219, 0.1);
+    }
+
+    .bg-secondary-soft {
+        background: rgba(108, 117, 125, 0.1);
+    }
+
+    .text-primary {
+        color: var(--primary) !important;
+    }
+
+    .text-success {
+        color: var(--success) !important;
+    }
+
+    .text-warning {
+        color: var(--warning) !important;
+    }
+
+    .text-info {
+        color: var(--info) !important;
+    }
+
+    /* Icons */
+    .icon-circle {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Progress Bar */
+    .bg-gradient-primary {
+        background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    }
+
+    /* Milestone Indicator */
+    .milestone-indicator {
+        cursor: help;
+    }
+
+    /* Checkbox Styling */
+    .form-check-input:checked {
+        background-color: var(--success);
+        border-color: var(--success);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .calendar-table {
+            font-size: 0.8rem;
+        }
+
+        .week-number {
+            font-size: 2rem;
+        }
+
+        .legend-item {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Tooltips Bootstrap
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Mise à jour de la semaine
+        document.getElementById('updateWeekBtn').addEventListener('click', function () {
+            const weekInput = document.getElementById('weekInput');
+            const newWeek = weekInput.value;
+            const currentWeekDisplay = document.getElementById('currentWeekDisplay');
+
+            if (newWeek < 1 || newWeek > 42) {
+                alert('Veuillez entrer une semaine valide (1-42)');
+                return;
+            }
+
+            // Confirmation
+            if (!confirm(`Êtes-vous sûre de vouloir passer à la semaine ${newWeek} ?`)) {
+                return;
+            }
+
+            // Envoi AJAX
+            fetch('{% url "update_pregnancy_week_ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `week=${newWeek}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mettre à jour l'affichage
+                        currentWeekDisplay.textContent = data.new_week;
+
+                        // Mettre à jour la barre de progression
+                        document.querySelector('.progress-bar').style.width = data.progress + '%';
+
+                        // Recharger la page pour mettre à jour tout le tableau
+                        location.reload();
+
+                        // Afficher un message de succès
+                        alert(data.message);
+                    } else {
+                        alert('Erreur: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue');
+                });
+        });
+
+        // Sauvegarde des symptômes
+        document.getElementById('saveSymptomBtn').addEventListener('click', function () {
+            const formData = new FormData(document.getElementById('symptomForm'));
+
+            fetch('{% url "add_symptom" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Fermer le modal
+                        bootstrap.Modal.getInstance(document.getElementById('addSymptomModal')).hide();
+
+                        // Recharger la page pour afficher le nouveau symptôme
+                        location.reload();
+                    } else {
+                        alert('Erreur: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue');
+                });
+        });
+
+        // Gestion des checkboxes de tâches
+        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function () {
+                const taskId = this.dataset.taskId;
+
+                fetch(`/pregnancy/task/${taskId}/toggle/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            // Revenir en arrière en cas d'erreur
+                            this.checked = !this.checked;
+                            alert('Erreur lors de la mise à jour');
+                        }
+                    })
+                    .catch(error => {
+                        this.checked = !this.checked;
+                        console.error('Error:', error);
+                    });
+            });
+        });
+    });
+</script>
+{% endblock %}

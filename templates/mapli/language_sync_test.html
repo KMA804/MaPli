@@ -1,0 +1,48 @@
+<!-- templates/mapli/language_sync_test.html -->
+{% extends 'mapli/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>{% trans "Test Synchronisation Langue" %}</h1>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5>{% trans "État de la Synchronisation" %}</h5>
+            <ul>
+                <li><strong>{% trans "Langue utilisateur" %}:</strong> {{ patient.preferred_language }}</li>
+                <li><strong>{% trans "Langue Django" %}:</strong> {{ django_language }}</li>
+                <li><strong>{% trans "Langue session" %}:</strong> {{ session_language }}</li>
+            </ul>
+
+            <button class="btn btn-primary" onclick="testVoiceSync()">
+                {% trans "Tester la voix synchronisée" %}
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function testVoiceSync() {
+        const userLang = '{{ patient.preferred_language }}';
+        const testMessages = {
+            'fr': 'Test réussi ! La voix et l\'interface sont synchronisées en français.',
+            'en': 'Test successful! Voice and interface are synchronized in English.',
+            'es': '¡Prueba exitosa! La voz y la interfaz están sincronizadas en español.',
+            'pt': 'Teste bem-sucedido! Voz e interface estão sincronizadas em português.',
+            'ar': 'نجح الاختبار! الصوت والواجهة متزامنان باللغة العربية.'
+        };
+
+        const message = testMessages[userLang] || testMessages['fr'];
+
+        if ('speechSynthesis' in window) {
+            const speech = new SpeechSynthesisUtterance();
+            speech.text = message;
+            speech.lang = userLang;
+            window.speechSynthesis.speak(speech);
+        }
+    }
+</script>
+{% endblock %}

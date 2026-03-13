@@ -1,0 +1,239 @@
+{% extends 'mapli/base.html' %}
+{% load static %}
+
+{% block title %}Mes rendez-vous - MaPli{% endblock %}
+
+{% block content %}
+<!-- Page Title -->
+<section class="page-title bg-gradient-primary">
+    <div class="container">
+        <div class="breadcrumbs">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="bi bi-house"></i> Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Mes rendez-vous</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="title-wrapper text-center text-white">
+            <h1 class="display-5 fw-bold mb-3">Mes rendez-vous</h1>
+            <p class="lead opacity-90">Consultez l'historique complet de vos consultations</p>
+        </div>
+    </div>
+</section>
+
+<section class="appointments-list-section bg-light py-5">
+    <div class="container">
+        <!-- Statistiques rapides -->
+        <div class="stats-row row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="stat-card bg-white rounded-4 shadow-sm p-4 text-center">
+                    <div class="stat-icon mb-3">
+                        <div class="icon-wrapper bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-calendar-check text-primary fs-3"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-2">{{ upcoming_count }}</h3>
+                    <p class="text-muted mb-0">Rendez-vous à venir</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card bg-white rounded-4 shadow-sm p-4 text-center">
+                    <div class="stat-icon mb-3">
+                        <div class="icon-wrapper bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-clock-history text-secondary fs-3"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-2">{{ past_count }}</h3>
+                    <p class="text-muted mb-0">Rendez-vous passés</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stat-card bg-white rounded-4 shadow-sm p-4 text-center">
+                    <div class="stat-icon mb-3">
+                        <div class="icon-wrapper bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center"
+                            style="width: 60px; height: 60px;">
+                            <i class="bi bi-hospital text-success fs-3"></i>
+                        </div>
+                    </div>
+                    <h3 class="fw-bold mb-2">{{ total_count }}</h3>
+                    <p class="text-muted mb-0">Total consultations</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglets : À venir / Passés -->
+        <div class="appointments-tabs">
+            <ul class="nav nav-pills mb-4 justify-content-center" id="appointmentsTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill px-5 py-2" id="upcoming-tab" data-bs-toggle="tab"
+                        data-bs-target="#upcoming" type="button" role="tab">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        À venir ({{ upcoming_count }})
+                    </button>
+                </li>
+                <li class="nav-item ms-2" role="presentation">
+                    <button class="nav-link rounded-pill px-5 py-2" id="past-tab" data-bs-toggle="tab"
+                        data-bs-target="#past" type="button" role="tab">
+                        <i class="bi bi-clock-history me-2"></i>
+                        Passés ({{ past_count }})
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="appointmentsTabContent">
+                <!-- Onglet À venir -->
+                <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
+                    {% if upcoming_appointments %}
+                    {% for apt in upcoming_appointments %}
+                    <div class="appointment-card bg-white rounded-4 shadow-sm mb-3 p-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="appointment-date bg-primary bg-opacity-10 rounded-3 p-3 text-center me-4"
+                                        style="min-width: 80px;">
+                                        <span class="day d-block fw-bold fs-4 text-primary">{{ apt.date|slice:":2"}}</span>
+                                        <span class="month text-muted small">{{ apt.date|slice:"3:5" }}</span>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-2 fw-bold">Dr. {{ apt.doctor_name }}</h5>
+                                        <p class="mb-1 text-muted small">
+                                            <i class="bi bi-hospital me-1"></i> {{ apt.hospital_name }}
+                                        </p>
+                                        <p class="mb-0 text-muted small">
+                                            <i class="bi bi-clock me-1"></i> {{ apt.time }}
+                                            <span class="badge bg-success bg-opacity-10 text-success ms-3">{{ apt.type  }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2">
+                                    N° {{ apt.registration_number }}
+                                </span>
+                            </div>
+                            <div class="col-lg-3 text-end">
+                                <a href="{% url 'appointment_success' apt.id %}"
+                                    class="btn btn-outline-primary rounded-pill px-4">
+                                    Détails
+                                    <i class="bi bi-arrow-right ms-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="empty-state text-center py-5">
+                        <div class="empty-icon mb-4">
+                            <div class="icon-wrapper bg-light rounded-circle d-inline-flex align-items-center justify-content-center"
+                                style="width: 100px; height: 100px;">
+                                <i class="bi bi-calendar-x text-muted fs-1"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-3">Aucun rendez-vous à venir</h4>
+                        <p class="text-muted mb-4">Vous n'avez pas de rendez-vous programmés pour le moment.</p>
+                        <a href="{% url 'appoint' %}" class="btn btn-primary rounded-pill px-5 py-3">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Prendre un rendez-vous
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Onglet Passés -->
+                <div class="tab-pane fade" id="past" role="tabpanel">
+                    {% if past_appointments %}
+                    {% for apt in past_appointments %}
+                    <div class="appointment-card bg-white rounded-4 shadow-sm mb-3 p-4 opacity-75">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="appointment-date bg-light rounded-3 p-3 text-center me-4"
+                                        style="min-width: 80px;">
+                                        <span class="day d-block fw-bold fs-4 text-muted">{{ apt.date|slice:":2" }}</span>
+                                        <span class="month text-muted small">{{ apt.date|slice:"3:5" }}</span>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-2 fw-bold">Dr. {{ apt.doctor_name }}</h5>
+                                        <p class="mb-1 text-muted small">
+                                            <i class="bi bi-hospital me-1"></i> {{ apt.hospital_name }}
+                                        </p>
+                                        <p class="mb-0 text-muted small">
+                                            <i class="bi bi-clock me-1"></i> {{ apt.time }}
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary ms-3">{{  apt.type }}</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <span class="badge bg-light text-muted px-3 py-2">
+                                    N° {{ apt.registration_number }}
+                                </span>
+                            </div>
+                            <div class="col-lg-3 text-end">
+                                <span class="badge bg-secondary px-3 py-2 rounded-pill">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Terminé
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="empty-state text-center py-5">
+                        <div class="empty-icon mb-4">
+                            <div class="icon-wrapper bg-light rounded-circle d-inline-flex align-items-center justify-content-center"
+                                style="width: 100px; height: 100px;">
+                                <i class="bi bi-calendar2-week text-muted fs-1"></i>
+                            </div>
+                        </div>
+                        <h4 class="fw-bold mb-3">Aucun historique</h4>
+                        <p class="text-muted mb-4">Vous n'avez pas encore effectué de rendez-vous.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton de retour -->
+        <div class="text-center mt-5">
+            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary rounded-pill px-5">
+                <i class="bi bi-arrow-left me-2"></i>
+                Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%) !important;
+    }
+
+    .nav-pills .nav-link.active {
+        background: linear-gradient(135deg, #4e54c8 0%, #8f94fb 100%);
+    }
+
+    .nav-pills .nav-link {
+        color: #4e54c8;
+        border: 1px solid rgba(78, 84, 200, 0.2);
+    }
+
+    .appointment-card {
+        transition: all 0.3s ease;
+        border-left: 4px solid #4e54c8;
+    }
+
+    .appointment-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .appointment-card.opacity-75 {
+        border-left-color: #6c757d;
+    }
+</style>
+{% endblock %}

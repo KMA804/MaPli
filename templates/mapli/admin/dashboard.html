@@ -1,0 +1,301 @@
+<!-- templates/mapli/admin/dashboard.html -->
+{% extends 'mapli/adabas.html' %}
+{% load static %}
+
+{% block title %}Administration système{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="h2 mb-4">
+        <i class="bi bi-shield-lock"></i>
+        Administration système
+    </h1>
+
+    <!-- Statistiques globales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Total utilisateurs</h6>
+                            <h2 class="mb-0">{{ total_users }}</h2>
+                        </div>
+                        <i class="bi bi-people" style="font-size: 2rem;"></i>
+                    </div>
+                    <small>{{ new_users_today }} nouveaux aujourd'hui</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Clients actifs</h6>
+                            <h2 class="mb-0">{{ active_clients }}</h2>
+                        </div>
+                        <i class="bi bi-person-check" style="font-size: 2rem;"></i>
+                    </div>
+                    <small>{{ inactive_clients }} inactifs</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Hôpitaux</h6>
+                            <h2 class="mb-0">{{ total_hospitals }}</h2>
+                        </div>
+                        <i class="bi bi-building" style="font-size: 2rem;"></i>
+                    </div>
+                    <small>{{ hospitals_with_doctors }} avec médecins</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title">Médecins</h6>
+                            <h2 class="mb-0">{{ total_doctors }}</h2>
+                        </div>
+                        <i class="bi bi-person-badge" style="font-size: 2rem;"></i>
+                    </div>
+                    <small>{{ doctors_available }} disponibles</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions rapides -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-lightning"></i> Actions rapides
+                </div>
+                <div class="card-body">
+                    <a href="{% url 'admin_users_list' %}" class="btn btn-outline-primary me-2">
+                        <i class="bi bi-person-plus"></i> Gérer utilisateurs
+                    </a>
+                    <a href="{% url 'admin_features_list' %}" class="btn btn-outline-success me-2">
+                        <i class="bi bi-toggle-on"></i> Gérer fonctionnalités
+                    </a>
+                    <a href="{% url 'admin_hospitals_list' %}" class="btn btn-outline-info me-2">
+                        <i class="bi bi-building-add"></i> Ajouter hôpital
+                    </a>
+                    <a href="{% url 'admin_logs' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-journal-text"></i> Voir logs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gestion des fonctionnalités pour les clients -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-toggles"></i>
+                    Fonctionnalités système
+                    <span class="float-end">
+                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addFeatureModal">
+                            <i class="bi bi-plus"></i> Ajouter
+                        </button>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fonctionnalité</th>
+                                <th>Statut</th>
+                                <th>Clients autorisés</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for feature in features %}
+                            <tr>
+                                <td>
+                                    <strong>{{ feature.name }}</strong><br>
+                                    <small class="text-muted">{{ feature.code }}</small>
+                                </td>
+                                <td>
+                                    {% if feature.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ feature.authorized_clients_count }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick=`editFeature({{ feature.id }})`>
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success"
+                                            onclick=`manageAccess({{ feature.id }})`>
+                                            <i class="bi bi-people"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">
+                                    Aucune fonctionnalité définie
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dernières activités -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-activity"></i> Dernières activités
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    <ul class="list-group list-group-flush">
+                        {% for log in recent_logs %}
+                        <li class="list-group-item">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <i class="bi bi-{{ log.icon }} text-{{ log.color }}"></i>
+                                    <strong>{{ log.user }}</strong> {{ log.action }}
+                                </div>
+                                <small class="text-muted">{{ log.time|timesince }}</small>
+                            </div>
+                            <small class="text-muted">{{ log.details }}</small>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-center text-muted">
+                            Aucune activité récente
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des derniers utilisateurs inscrits -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-person-lines-fill"></i>
+                    Derniers utilisateurs inscrits
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Statut</th>
+                                <th>Inscription</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_item in recent_users %}
+                            <tr>
+                                <td>#{{ user_item.id }}</td>
+                                <td>{{ user_item.first_name }} {{ user_item.last_name }}</td>
+                                <td>{{ user_item.email }}</td>
+                                <td>
+                                    <span class="badge bg-{{ user_item.role_color }}">
+                                        {{ user_item.role }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if user_item.is_active %}
+                                    <span class="badge bg-success">Actif</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">Inactif</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user_item.date_joined|date:"d/m/Y" }}</td>
+                                <td>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Fonctionnalité -->
+<div class="modal fade" id="addFeatureModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Ajouter une fonctionnalité</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'admin_add_feature' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Nom de la fonctionnalité</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Code unique</label>
+                        <input type="text" name="code" class="form-control" required>
+                        <small class="text-muted">Ex: export_pdf, ultrasound_booking, etc.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label>Description</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="is_active" class="form-check-input" checked>
+                        <label class="form-check-label">Activer globalement</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleUser(userId) {
+        if (confirm('Activer/Désactiver cet utilisateur ?')) {
+            fetch(`/admin/users/${userId}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => {
+                if (response.ok) location.reload();
+            });
+        }
+    }
+
+    function manageAccess(featureId) {
+        window.location.href = `/admin/features/${featureId}/access/`;
+    }
+</script>
+{% endblock %}

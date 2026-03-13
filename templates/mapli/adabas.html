@@ -1,0 +1,402 @@
+<!-- templates/mapli/base.html -->
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>{% block title %}MaPli - Administration{% endblock %}</title>
+    <meta name="description" content="Interface d'administration MaPli">
+
+    <!-- Favicons -->
+    <link href="{% static 'img/favicon.png' %}" rel="icon">
+    <link href="{% static 'img/apple-touch-icon.png' %}" rel="apple-touch-icon">
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Vendor CSS Files -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Styles personnalisés -->
+    <style>
+        :root {
+            --primary-color: #667EEA;
+            --secondary-color: #764BA2;
+            --success-color: #10B981;
+            --warning-color: #F59E0B;
+            --danger-color: #EF4444;
+            --text-primary: #1F2937;
+            --text-secondary: #6B7280;
+            --bg-light: #F3F4F6;
+            --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Styles pour la sidebar - CORRIGÉ POUR AFFICHER TOUS LES MODULES */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            color: white;
+            z-index: 1000;
+            box-shadow: var(--shadow-medium);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            /* Permet le défilement vertical */
+        }
+
+        /* Personnalisation de la barre de défilement */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            padding: 12px 20px;
+            display: block;
+            transition: all 0.3s;
+            border-radius: 8px;
+            margin: 4px 10px;
+            font-size: 0.95rem;
+        }
+
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .sidebar a.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .sidebar i {
+            margin-right: 12px;
+            width: 20px;
+            font-size: 1.1rem;
+        }
+
+        .sidebar .sidebar-header {
+            padding: 30px 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar .sidebar-header h4 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .sidebar .sidebar-header small {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+
+        .sidebar .user-profile {
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin: 0 10px 20px;
+        }
+
+        .sidebar .nav-section-title {
+            padding: 15px 20px 5px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Style pour le bouton de déconnexion */
+        .logout-section {
+            padding: 20px 10px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 10px;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-btn {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5 !important;
+            width: 100%;
+            text-align: left;
+            padding: 12px 20px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: block;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: #ef4444;
+            color: white !important;
+            transform: translateX(5px);
+        }
+
+        .logout-btn i {
+            margin-right: 12px;
+        }
+
+        /* Contenu principal */
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+            min-height: 100vh;
+            background: #f8fafc;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        /* Alertes */
+        .alert {
+            border: none;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
+        }
+
+        .alert-error,
+        .alert-danger {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
+            color: white;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+            color: white;
+        }
+
+        .alert .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .card-header {
+            background: white;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+
+        /* Badges */
+        .badge {
+            padding: 5px 10px;
+            font-weight: 500;
+            border-radius: 6px;
+        }
+
+        /* Tables */
+        .table th {
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom-width: 1px;
+        }
+
+        .table td {
+            vertical-align: middle;
+        }
+
+        /* Boutons */
+        .btn {
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Sidebar Admin -->
+    {% if user.is_authenticated and user.role == 'admin_systeme' %}
+    <div class="sidebar">
+        <div class="sidebar-header text-center">
+            <i class="bi bi-heart-pulse" style="font-size: 2.5rem;"></i>
+            <h4 class="mb-0 mt-2">MaPli Admin</h4>
+            <small>Espace administration</small>
+        </div>
+
+        <div class="user-profile text-center">
+            <i class="bi bi-person-circle" style="font-size: 2.5rem;"></i>
+            <h6 class="mt-2 text-white">{{ user.first_name|default:user.username }} {{ user.last_name }}</h6>
+            <small class="text-white-50">{{ user.email }}</small>
+            <div class="mt-2">
+                <span class="badge bg-danger">Administrateur</span>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="nav flex-column">
+            <!-- Tableau de bord -->
+            <a href="{% url 'admin_dashboard' %}"
+                class="{% if request.path == '/gestion/dashboard/' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i> Tableau de bord
+            </a>
+
+            <!-- Section Gestion des utilisateurs -->
+            <div class="nav-section-title">Gestion des utilisateurs</div>
+            <a href="{% url 'admin_users_list' %}" class="{% if '/gestion/users/' in request.path %}active{% endif %}">
+                <i class="bi bi-people"></i> Tous les utilisateurs
+            </a>
+            <a href="{% url 'admin_patients_list' %}"
+                class="{% if '/gestion/patients/' in request.path %}active{% endif %}">
+                <i class="bi bi-person-check"></i> Patients
+            </a>
+
+            <!-- Section Gestion des établissements -->
+            <div class="nav-section-title">Gestion des établissements</div>
+            <a href="{% url 'admin_hospitals_list' %}"
+                class="{% if '/gestion/hospitals/' in request.path %}active{% endif %}">
+                <i class="bi bi-building"></i> Hôpitaux
+            </a>
+            <a href="{% url 'admin_doctors_list' %}"
+                class="{% if '/gestion/doctors/' in request.path %}active{% endif %}">
+                <i class="bi bi-person-badge"></i> Médecins
+            </a>
+
+            <!-- Section Configuration -->
+            <div class="nav-section-title">Configuration</div>
+            <a href="{% url 'admin_features_list' %}"
+                class="{% if '/gestion/features/' in request.path %}active{% endif %}">
+                <i class="bi bi-toggle-on"></i> Fonctionnalités
+            </a>
+            <a href="{% url 'admin_logs' %}" class="{% if '/gestion/logs/' in request.path %}active{% endif %}">
+                <i class="bi bi-journal-text"></i> Journaux
+            </a>
+
+            <!-- Section Compte -->
+            <div class="nav-section-title">Compte</div>
+            <a href="#">
+                <i class="bi bi-gear"></i> Profil
+            </a>
+
+            <!-- Section Déconnexion -->
+            <div class="logout-section">
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn">
+                        <i class="bi bi-box-arrow-right"></i> Déconnexion
+                    </button>
+                </form>
+            </div>
+        </nav>
+    </div>
+    {% endif %}
+
+    <!-- Contenu principal -->
+    <div class="main-content">
+        <!-- Messages système -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <div class="d-flex align-items-center">
+                {% if message.tags == 'success' %}
+                <i class="bi bi-check-circle-fill me-2"></i>
+                {% elif message.tags == 'error' %}
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {% elif message.tags == 'warning' %}
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                {% else %}
+                <i class="bi bi-info-circle-fill me-2"></i>
+                {% endif %}
+                <strong>{{ message }}</strong>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Contenu de la page -->
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Vendor JS Files -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,147 @@
+<!-- templates/mapli/admin/hospital_detail.html -->
+{% extends 'mapli/adabas.html' %}
+{% load static %}
+
+{% block title %}Détail - {{ hospital.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="{% url 'admin_hospitals_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-building fs-1 text-primary"></i>
+                    </div>
+                    <h4 class="mb-1">{{ hospital.name }}</h4>
+                    <p class="text-muted mb-3">ID: #{{ hospital.id }}</p>
+                    
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        {% if hospital.is_active %}
+                            <span class="badge bg-success">Actif</span>
+                        {% else %}
+                            <span class="badge bg-danger">Inactif</span>
+                        {% endif %}
+                        
+                        {% if hospital.verified_at %}
+                            <span class="badge bg-info">Vérifié</span>
+                        {% else %}
+                            <span class="badge bg-warning">Non vérifié</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-warning" onclick="toggleHospital({{ hospital.id }})">
+                            <i class="bi bi-toggle-on me-2"></i>
+                            {% if hospital.is_active %}Désactiver{% else %}Activer{% endif %}
+                        </button>
+                        <button class="btn btn-outline-success" onclick="verifyHospital({{ hospital.id }})">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Vérifier
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">Informations de contact</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th style="width: 150px;">Adresse:</th>
+                            <td>{{ hospital.address }}</td>
+                        </tr>
+                        <tr>
+                            <th>Téléphone:</th>
+                            <td><a href="tel:{{ hospital.phone_number }}">{{ hospital.phone_number }}</a></td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td><a href="mailto:{{ hospital.email }}">{{ hospital.email }}</a></td>
+                        </tr>
+                        <tr>
+                            <th>Coordonnées:</th>
+                            <td>Lat: {{ hospital.latitude }}, Long: {{ hospital.longitude }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Médecins de l'établissement</h5>
+                    <span class="badge bg-primary">{{ hospital.doctors.count }} médecins</span>
+                </div>
+                <div class="card-body">
+                    {% if hospital.doctors.all %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Spécialité</th>
+                                        <th>Contact</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for doctor in hospital.doctors.all %}
+                                    <tr>
+                                        <td>Dr. {{ doctor.name }}</td>
+                                        <td>{{ doctor.speciality.name }}</td>
+                                        <td>{{ doctor.phone_number }}</td>
+                                        <td>
+                                            {% if doctor.is_active %}
+                                                <span class="badge bg-success">Actif</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Inactif</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center py-3">Aucun médecin dans cet établissement</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleHospital(id) {
+        if(confirm('{% if hospital.is_active %}Désactiver{% else %}Activer{% endif %} cet hôpital ?')) {
+            fetch(`/gestion/hospitals/${id}/toggle/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'}
+            }).then(response => {
+                if(response.ok) location.reload();
+            });
+        }
+    }
+
+    function verifyHospital(id) {
+        if(confirm('Vérifier cet hôpital ?')) {
+            fetch(`/gestion/hospitals/${id}/verify/`, {
+                method: 'POST',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'}
+            }).then(response => {
+                if(response.ok) location.reload();
+            });
+        }
+    }
+</script>
+{% endblock %}

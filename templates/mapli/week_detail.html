@@ -1,0 +1,431 @@
+{% extends 'mapli/base.html' %}
+{% load static %}
+
+{% block title %}Semaine {{ week_number }} - Calendrier de grossesse{% endblock %}
+
+{% block content %}
+<section class="week-detail-section py-5 bg-light">
+    <div class="container">
+        <!-- Navigation CORRIGÉE -->
+        <div class="week-navigation mb-4">
+            <nav aria-label="Navigation semaines">
+                <ul class="pagination justify-content-center">
+                    <!-- Semaine précédente - CORRIGÉ -->
+                    <li class="page-item {% if week_number <= 1 %}disabled{% endif %}">
+                        {% if week_number > 1 %}
+                        <a class="page-link" href="{% url 'week_detail' week_number|add:'-1' %}">
+                            <i class="bi bi-chevron-left"></i> Semaine précédente
+                        </a>
+                        {% else %}
+                        <span class="page-link">
+                            <i class="bi bi-chevron-left"></i> Semaine précédente
+                        </span>
+                        {% endif %}
+                    </li>
+
+                    <!-- Semaine courante -->
+                    <li class="page-item active">
+                        <span class="page-link">Semaine {{ week_number }}</span>
+                    </li>
+
+                    <!-- Semaine suivante - CORRIGÉ -->
+                    <li class="page-item {% if week_number >= 42 %}disabled{% endif %}">
+                        {% if week_number < 42 %} <a class="page-link"
+                            href="{% url 'week_detail' week_number|add:'1' %}">
+                            Semaine suivante <i class="bi bi-chevron-right"></i>
+                            </a>
+                            {% else %}
+                            <span class="page-link">
+                                Semaine suivante <i class="bi bi-chevron-right"></i>
+                            </span>
+                            {% endif %}
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- RESTE DU CODE IDENTIQUE -->
+        <!-- En-tête de la semaine -->
+        <div class="week-header mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="display-6 fw-bold mb-2">Semaine {{ week_number }}</h1>
+                            <div class="week-meta d-flex flex-wrap gap-3">
+                                {% if week.week_number <= 13 %} <span
+                                    class="badge bg-primary-soft text-primary px-3 py-2">
+                                    1er trimestre
+                                    </span>
+                                    {% elif week.week_number <= 26 %} <span
+                                        class="badge bg-success-soft text-success px-3 py-2">
+                                        2ème trimestre
+                                        </span>
+                                        {% else %}
+                                        <span class="badge bg-warning-soft text-warning px-3 py-2">
+                                            3ème trimestre
+                                        </span>
+                                        {% endif %}
+
+                                        {% if week.start_date %}
+                                        <span class="badge bg-light text-dark px-3 py-2">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            {{ week.start_date|date:"d/m/Y" }} - {{ week.end_date|date:"d/m/Y" }}
+                                        </span>
+                                        {% endif %}
+
+                                        {% if is_current %}
+                                        <span class="badge bg-success-soft text-success px-3 py-2">
+                                            <i class="bi bi-check-circle me-1"></i> Semaine en cours
+                                        </span>
+                                        {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            {% if not week.is_completed and is_current %}
+                            <button class="btn btn-success" id="markWeekCompleted">
+                                <i class="bi bi-check2-circle me-2"></i>Marquer comme complétée
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Développement du bébé -->
+        <div class="baby-development mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">
+                        <i class="bi bi-heart-pulse text-primary me-2"></i>
+                        Développement du bébé
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="baby-stats bg-light rounded-3 p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon me-3">
+                                        <i class="bi bi-rulers fs-2 text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Taille</small>
+                                        <h5 class="mb-0">{{ week.baby_size|default:"Information non disponible" }}</h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="baby-stats bg-light rounded-3 p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon me-3">
+                                        <i class="bi bi-weight-gain fs-2 text-success"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Poids</small>
+                                        <h5 class="mb-0">{{ week.baby_weight|default:"Information non disponible" }}
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="baby-stats bg-light rounded-3 p-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="stat-icon me-3">
+                                        <i class="bi bi-arrow-through-heart fs-2 text-warning"></i>
+                                    </div>
+                                    <div>
+                                        <small class="text-muted">Comparaison</small>
+                                        <h5 class="mb-0">{{ week.baby_comparison|default:"Information non disponible" }}
+                                        </h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h5>Description</h5>
+                        <p>{{ week.baby_development|default:"Aucune information disponible pour cette semaine." }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Changements chez la mère -->
+        <div class="mother-changes mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">
+                        <i class="bi bi-person-arms-up text-primary me-2"></i>
+                        Changements chez la mère
+                    </h4>
+                    <p>{{ week.mother_changes|default:"Aucune information disponible pour cette semaine." }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conseils et recommandations -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h5 class="mb-3">
+                            <i class="bi bi-cup-straw text-primary me-2"></i>
+                            Conseils nutritionnels
+                        </h5>
+                        <p>{{ week.nutrition_tips|default:"Aucun conseil nutritionnel disponible." }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h5 class="mb-3">
+                            <i class="bi bi-heart-pulse text-primary me-2"></i>
+                            Conseils médicaux
+                        </h5>
+                        <p>{{ week.medical_advice|default:"Aucun conseil médical disponible." }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercices recommandés -->
+        <div class="exercises mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">
+                        <i class="bi bi-person-walking text-primary me-2"></i>
+                        Exercices recommandés
+                    </h4>
+                    <p>{{ week.exercises|default:"Aucun exercice recommandé pour cette semaine." }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jalons importants -->
+        {% if milestones %}
+        <div class="milestones mb-4">
+            <h4 class="mb-3">
+                <i class="bi bi-star-fill text-primary me-2"></i>
+                Jalons importants
+            </h4>
+            <div class="row g-3">
+                {% for milestone in milestones %}
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-3">
+                            <div class="d-flex align-items-center">
+                                <div class="milestone-icon me-3">
+                                    <i class="bi bi-{{ milestone.icon|default:'star-fill' }} fs-3 text-primary"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">{{ milestone.title }}</h6>
+                                    <p class="small text-muted mb-0">{{ milestone.description }}</p>
+                                </div>
+                                {% if milestone.is_completed %}
+                                <span class="badge bg-success ms-auto">
+                                    <i class="bi bi-check-lg"></i> Complété
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Rendez-vous de la semaine -->
+        {% if appointments %}
+        <div class="week-appointments mb-4">
+            <h4 class="mb-3">
+                <i class="bi bi-calendar-check text-primary me-2"></i>
+                Rendez-vous cette semaine
+            </h4>
+            <div class="list-group">
+                {% for apt in appointments %}
+                <div class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ apt.scheduled_date|date:"l d/m/Y" }} à {{ apt.scheduled_date|date:"H:i" }}</h6>
+                            <p class="mb-0 small">{{ apt.doctor.name }} - {{ apt.hospital.name }}</p>
+                        </div>
+                        <span class="badge bg-primary">{{ apt.get_status_display }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Notes personnelles -->
+        <div class="personal-notes">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">
+                        <i class="bi bi-pencil-square text-primary me-2"></i>
+                        Mes notes
+                    </h4>
+                    <div class="notes-content mb-3">
+                        {% if week.notes %}
+                        <p>{{ week.notes }}</p>
+                        {% else %}
+                        <p class="text-muted fst-italic">Aucune note pour cette semaine.</p>
+                        {% endif %}
+                    </div>
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editNotesModal">
+                        <i class="bi bi-pencil me-2"></i>Modifier mes notes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal pour éditer les notes -->
+<div class="modal fade" id="editNotesModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Mes notes - Semaine {{ week_number }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="notesForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" rows="5">{{ week.notes }}</textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="saveNotesBtn">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .week-detail-section {
+        min-height: 100vh;
+    }
+
+    .pagination .page-link {
+        color: var(--primary);
+        border: none;
+        padding: 0.75rem 1.5rem;
+        margin: 0 0.25rem;
+        border-radius: 50px !important;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        color: white;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        background: #f8f9fa;
+        color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.65;
+        pointer-events: none;
+    }
+
+    .baby-stats {
+        transition: all 0.3s ease;
+    }
+
+    .baby-stats:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .milestone-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(78, 84, 200, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .card {
+        animation: fadeIn 0.5s ease-out;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Sauvegarde des notes
+        document.getElementById('saveNotesBtn')?.addEventListener('click', function () {
+            const formData = new FormData(document.getElementById('notesForm'));
+
+            fetch(`/pregnancy/week/{{ week_number }}/notes/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('editNotesModal')).hide();
+                        location.reload();
+                    } else {
+                        alert('Erreur: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Une erreur est survenue');
+                });
+        });
+
+        // Marquer la semaine comme complétée
+        document.getElementById('markWeekCompleted')?.addEventListener('click', function () {
+            if (confirm('Voulez-vous marquer cette semaine comme complétée ?')) {
+                fetch(`/pregnancy/week/{{ week_number }}/complete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            location.reload();
+                        } else {
+                            alert('Erreur: ' + data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Une erreur est survenue');
+                    });
+            }
+        });
+    });
+</script>
+{% endblock %}

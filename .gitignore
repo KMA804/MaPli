@@ -1,0 +1,32 @@
+static/
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+
+# Base de données
+*.sqlite3
+*.db
+
+# Environnement virtuel
+env/
+venv/
+.env
+myenv/
+env/
+.env.local
+
+# Django static files (collectés)
+staticfiles/
+/media/
+
+# Fichiers de l'IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Fichiers système
+Thumbs.db
+.DS_Store

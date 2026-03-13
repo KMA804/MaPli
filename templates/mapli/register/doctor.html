@@ -1,0 +1,193 @@
+<!-- templates/mapli/register/doctor.html -->
+{% extends 'mapli/base.html' %}
+{% load static %}
+
+{% block title %}Inscription Médecin - MaPli{% endblock %}
+
+{% block content %}
+<section class="page-title">
+    <div class="container">
+        <div class="breadcrumbs">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="bi bi-house"></i> Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'index' %}">Connexion</a></li>
+                    <li class="breadcrumb-item active">Inscription Médecin</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="title-wrapper">
+            <h1>Inscription Professionnel de Santé</h1>
+            <p>Rejoignez notre réseau de médecins partenaires</p>
+        </div>
+    </div>
+</section>
+
+<section class="contact section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="auth-card service-card hover-lift">
+                    <div class="card-body p-5">
+                        <!-- En-tête -->
+                        <div class="auth-header text-center mb-5">
+                            <div class="auth-logo mb-4">
+                                <div class="logo-wrapper mx-auto">
+                                    <i class="bi bi-person-badge"></i>
+                                </div>
+                            </div>
+                            <h2 class="auth-title mb-3">Inscription Médecin</h2>
+                            <p class="auth-subtitle">
+                                Créez votre compte professionnel pour gérer vos consultations
+                            </p>
+                        </div>
+
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <!-- Informations du compte utilisateur -->
+                            <div class="form-section mb-5">
+                                <div class="section-header mb-4">
+                                    <div class="section-icon">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <h5 class="section-title">Compte utilisateur</h5>
+                                    <div class="section-divider"></div>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Prénom *</label>
+                                            {{ user_form.first_name }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Nom *</label>
+                                            {{ user_form.last_name }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-4 mt-2">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Nom d'utilisateur *</label>
+                                            {{ user_form.username }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Email *</label>
+                                            {{ user_form.email }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-4 mt-2">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Mot de passe *</label>
+                                            {{ user_form.password1 }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Confirmer mot de passe *</label>
+                                            {{ user_form.password2 }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informations professionnelles -->
+                            <div class="form-section mb-5">
+                                <div class="section-header mb-4">
+                                    <div class="section-icon">
+                                        <i class="bi bi-briefcase"></i>
+                                    </div>
+                                    <h5 class="section-title">Informations professionnelles</h5>
+                                    <div class="section-divider"></div>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Numéro d'ordre *</label>
+                                            {{ profile_form.license_number }}
+                                            <small class="text-muted">Votre numéro d'inscription à l'ordre des
+                                                médecins</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Spécialité *</label>
+                                            {{ doctor_form.speciality }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-4 mt-2">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label class="form-label">Hôpital de rattachement *</label>
+                                            {{ doctor_form.hospital }}
+                                            <small class="text-muted">Sélectionnez l'hôpital où vous exercez</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-4 mt-2">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Téléphone *</label>
+                                            {{ doctor_form.phone_number }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Email professionnel *</label>
+                                            {{ doctor_form.email }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-4 mt-2">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Certificat de spécialisation</label>
+                                            {{ profile_form.specialization_certificate }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label class="form-label">Honoraires consultation</label>
+                                            {{ profile_form.consultation_fee }}
+                                            <small class="text-muted">En FCFA</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary btn-auth w-100 py-3 mb-4">
+                                    <i class="bi bi-person-badge me-2"></i>
+                                    Créer mon compte médecin
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="auth-footer text-center pt-4 border-top">
+                            <p class="text-muted mb-0">
+                                Déjà inscrit ?
+                                <a href="{% url 'index' %}" class="auth-link fw-semibold">Connectez-vous</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

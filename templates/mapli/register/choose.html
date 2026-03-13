@@ -1,0 +1,149 @@
+<!-- templates/mapli/register/choose.html -->
+{% extends 'mapli/base.html' %}
+{% load static %}
+
+{% block title %}Choisir un compte - MaPli{% endblock %}
+
+{% block content %}
+<section class="page-title">
+    <div class="container">
+        <div class="breadcrumbs">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="bi bi-house"></i> Accueil</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Inscription</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="title-wrapper">
+            <h1>Créer votre compte</h1>
+            <p>Choisissez le type de compte à créer</p>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="auth-card">
+                    <div class="card-body p-5">
+                        <div class="auth-header text-center mb-5">
+                            <div class="auth-logo mb-4">
+                                <div class="logo-wrapper mx-auto">
+                                    <i class="bi bi-person-plus-fill"></i>
+                                </div>
+                            </div>
+                            <h2 class="auth-title mb-3">Rejoignez MaPli</h2>
+                            <p class="auth-subtitle">
+                                Sélectionnez le type de compte que vous souhaitez créer
+                            </p>
+                        </div>
+
+                        <div class="row g-4 justify-content-center">
+                            <!-- Option Patient -->
+                            <div class="col-md-6 col-lg-4">
+                                <a href="{% url 'register_patient' %}" class="text-decoration-none">
+                                    <div class="card h-100 text-center p-4 hover-lift">
+                                        <div class="card-body">
+                                            <div class="mb-4">
+                                                <div class="icon-wrapper mx-auto"
+                                                    style="width: 80px; height: 80px; background: linear-gradient(135deg, #667EEA, #764BA2); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-person-heart fs-1 text-white"></i>
+                                                </div>
+                                            </div>
+                                            <h5 class="mb-3">Patient</h5>
+                                            <p class="text-muted small mb-0">
+                                                Suivi de grossesse personnalisé, calendrier et rendez-vous
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- Option Hôpital -->
+                            <div class="col-md-6 col-lg-4">
+                                <a href="{% url 'register_hospital' %}" class="text-decoration-none">
+                                    <div class="card h-100 text-center p-4 hover-lift">
+                                        <div class="card-body">
+                                            <div class="mb-4">
+                                                <div class="icon-wrapper mx-auto"
+                                                    style="width: 80px; height: 80px; background: linear-gradient(135deg, #10B981, #34D399); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-building fs-1 text-white"></i>
+                                                </div>
+                                            </div>
+                                            <h5 class="mb-3">Hôpital</h5>
+                                            <p class="text-muted small mb-0">
+                                                Établissement de santé, gestion des rendez-vous
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+
+                            <!-- Option Médecin -->
+                            <div class="col-md-6 col-lg-4">
+                                <a href="{% url 'register_doctor' %}" class="text-decoration-none">
+                                    <div class="card h-100 text-center p-4 hover-lift">
+                                        <div class="card-body">
+                                            <div class="mb-4">
+                                                <div class="icon-wrapper mx-auto"
+                                                    style="width: 80px; height: 80px; background: linear-gradient(135deg, #F59E0B, #FBBF24); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-person-badge fs-1 text-white"></i>
+                                                </div>
+                                            </div>
+                                            <h5 class="mb-3">Médecin</h5>
+                                            <p class="text-muted small mb-0">
+                                                Professionnel de santé, gestion des consultations
+                                            </p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Note pour l'admin -->
+                        <div class="text-center mt-5 pt-4 border-top">
+                            <p class="text-muted small">
+                                <i class="bi bi-shield-lock me-2"></i>
+                                Vous êtes administrateur ? La création de comptes administrateur est réservée.
+                                <a href="{% url 'index' %}" class="text-decoration-none">Connectez-vous</a> si vous avez
+                                déjà un compte.
+                            </p>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <p class="text-muted">
+                                Vous avez déjà un compte ?
+                                <a href="{% url 'index' %}" class="auth-link fw-semibold">Connectez-vous</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .hover-lift {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        border-radius: 15px;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    .icon-wrapper {
+        transition: transform 0.3s ease;
+    }
+
+    .hover-lift:hover .icon-wrapper {
+        transform: scale(1.1) rotate(5deg);
+    }
+</style>
+{% endblock %}

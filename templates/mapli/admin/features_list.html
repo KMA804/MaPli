@@ -1,0 +1,180 @@
+<!-- templates/mapli/admin/features_list.html -->
+{% extends 'mapli/adabas.html' %}
+{% load static %}
+
+{% block title %}Gestion des fonctionnalités - MaPli{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">
+            <i class="bi bi-toggles me-2"></i>
+            Gestion des fonctionnalités
+        </h1>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFeatureModal">
+            <i class="bi bi-plus-circle me-2"></i>
+            Nouvelle fonctionnalité
+        </button>
+    </div>
+
+    <div class="row">
+        {% for feature in features %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm feature-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="card-title mb-1">{{ feature.nom }}</h5>
+                            <small class="text-muted">{{ feature.code }}</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" 
+                                   {% if feature.est_active_globalement %}checked{% endif %}
+                                   onchange="toggleGlobalFeature({{ feature.id }}, this.checked)">
+                        </div>
+                    </div>
+                    
+                    <p class="card-text text-muted small mb-3">
+                        {{ feature.description|default:"Aucune description"|truncatechars:100 }}
+                    </p>
+                    
+                    <div class="mb-3">
+                        <span class="badge bg-info">{{ feature.categorie }}</span>
+                        <span class="badge bg-secondary">{{ feature.clients_count }} clients</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label small">Rôles autorisés par défaut</label>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% if 'patient' in feature.roles_autorises %}
+                                <span class="badge bg-primary">Patient</span>
+                            {% endif %}
+                            {% if 'hopital' in feature.roles_autorises %}
+                                <span class="badge bg-success">Hôpital</span>
+                            {% endif %}
+                            {% if 'medecin' in feature.roles_autorises %}
+                                <span class="badge bg-warning">Médecin</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>
+                            {{ feature.date_modification|timesince }}
+                        </small>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="editFeature({{ feature.id }})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-info" onclick="manageAccess({{ feature.id }})">
+                                <i class="bi bi-people"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="bi bi-toggles fs-1 text-muted d-block mb-3"></i>
+                <p class="text-muted">Aucune fonctionnalité définie</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFeatureModal">
+                    Créer la première fonctionnalité
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal Ajouter Fonctionnalité (identique à celui du dashboard) -->
+<div class="modal fade" id="addFeatureModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Ajouter une fonctionnalité
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'admin_add_feature' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nom *</label>
+                        <input type="text" name="nom" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Code unique *</label>
+                        <input type="text" name="code" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Catégorie</label>
+                        <select name="categorie" class="form-select">
+                            <option value="rendez_vous">Rendez-vous</option>
+                            <option value="calendrier">Calendrier</option>
+                            <option value="documents">Documents</option>
+                            <option value="paiement">Paiement</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="est_active_globalement" class="form-check-input" id="activeGlobal" checked>
+                        <label class="form-check-label" for="activeGlobal">Active globalement</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Ajouter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .feature-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+    }
+    .form-switch .form-check-input {
+        width: 3em;
+        height: 1.5em;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    function toggleGlobalFeature(featureId, isActive) {
+        fetch(`/admin/features/${featureId}/toggle-global/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({active: isActive})
+        }).then(response => {
+            if(!response.ok) alert('Erreur lors de la modification');
+        });
+    }
+    
+    function editFeature(featureId) {
+        window.location.href = `/admin/features/${featureId}/edit/`;
+    }
+    
+    function manageAccess(featureId) {
+        window.location.href = `/admin/features/${featureId}/access/`;
+    }
+</script>
+{% endblock %}

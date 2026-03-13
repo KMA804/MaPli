@@ -1,0 +1,877 @@
+{% extends 'mapli/base.html' %}
+{% load static %}
+
+{% block title %}Exercices Adaptés - MaPli{% endblock %}
+
+{% block content %}
+<section class="exercices-adaptes">
+    <div class="container">
+        <!-- En-tête dynamique -->
+        <div class="exercices-header text-center mb-5">
+            <div class="header-badge mb-3">
+                <span class="badge bg-primary">
+                    {{ data.title }}
+                </span>
+            </div>
+            <h1>{{ data.title }}</h1>
+            <p class="lead">{{ data.description }}</p>
+        </div>
+
+        <!-- Lecteur séquentiel d'exercices -->
+        <div class="sequential-player">
+            <!-- Informations de progression -->
+            <div class="progress-info text-center mb-4">
+                <span class="badge bg-primary" id="current-exercise-counter">Exercice 1/{{data.exercices|length}}</span>
+                <h3 id="current-exercise-name" class="mt-2">{{ data.exercices.0.nom }}</h3>
+                <p id="current-exercise-description" class="text-muted">{{ data.exercices.0.description }}</p>
+
+                <!-- Timer visuel -->
+                <div class="timer-container mt-3">
+                    <div class="d-flex justify-content-center align-items-center mb-2">
+                        <div class="spinner-grow text-primary me-2" role="status" id="playing-indicator"
+                            style="width: 1rem; height: 1rem; display: inline-block;">
+                            <span class="visually-hidden">Lecture en cours...</span>
+                        </div>
+                        <span id="playback-status" class="text-muted">Lecture automatique</span>
+                    </div>
+                    <div class="progress"
+                        style="height: 30px; width: 100%; max-width: 300px; margin: 0 auto; border-radius: 15px;">
+                        <div id="exercise-timer-bar" class="progress-bar bg-success" role="progressbar"
+                            style="width: 100%; transition: width 0.1s linear;">
+                            <span id="timer-text" class="fw-bold">30s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lecteur vidéo principal -->
+            <div class="main-player-card card mb-4">
+                <div class="card-body">
+                    <!-- Vidéo avec lecture automatique -->
+                    <div class="exercice-media mb-3">
+                        <div class="video-wrapper position-relative">
+                            <video id="main-video" class="exercise-video" width="100%"
+                                style="border-radius: 8px; background: #000;" autoplay playsinline preload="auto" muted>
+                                <source id="video-source" src="{% static data.exercices.0.video %}" type="video/mp4">
+                                Votre navigateur ne supporte pas la vidéo.
+                            </video>
+
+                            <!-- Message si vidéo ne charge pas -->
+                            <div id="video-error-message"
+                                class="position-absolute top-50 start-50 translate-middle text-white bg-danger p-2 rounded"
+                                style="display: none; z-index: 10;">
+                                Erreur de chargement vidéo
+                            </div>
+
+                            <!-- Overlay de contrôle -->
+                            <div class="video-overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+                                style="background: rgba(0,0,0,0.2); border-radius: 8px; opacity: 0; transition: opacity 0.3s; cursor: pointer;">
+                                <button id="play-pause-btn" class="btn btn-light rounded-circle p-3"
+                                    style="width: 60px; height: 60px; pointer-events: auto;">
+                                    <i id="play-pause-icon" class="bi bi-pause-fill fs-1"></i>
+                                </button>
+                            </div>
+
+                            <!-- Barre de progression vidéo -->
+                            <div class="video-controls position-absolute bottom-0 start-0 w-100 p-2"
+                                style="background: linear-gradient(transparent, rgba(0,0,0,0.7)); border-radius: 0 0 8px 8px; opacity: 0; transition: opacity 0.3s;">
+                                <div class="progress-container mb-2"
+                                    style="height: 4px; background: rgba(255,255,255,0.3); cursor: pointer;">
+                                    <div id="video-progress" class="progress-bar"
+                                        style="width: 0%; height: 100%; background: linear-gradient(90deg, #667EEA, #764BA2);">
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center text-white small">
+                                    <span id="current-time">0:00</span>
+                                    <span id="duration">0:30</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instructions de l'exercice en cours -->
+                    <div id="current-instructions" class="exercice-instructions mt-3">
+                        <h6><i class="bi bi-list-check me-2"></i>Instructions :</h6>
+                        <ul id="instructions-list" class="list-unstyled small">
+                            <!-- Les instructions seront chargées dynamiquement -->
+                        </ul>
+                    </div>
+
+                    <!-- Bénéfices de l'exercice en cours -->
+                    <div id="current-benefits" class="exercice-benefits mt-3">
+                        <h6><i class="bi bi-star me-2"></i>Bénéfices :</h6>
+                        <div id="benefits-tags" class="benefits-tags">
+                            <!-- Les bénéfices seront chargés dynamiquement -->
+                        </div>
+                    </div>
+
+                    <!-- Navigation simplifiée -->
+                    <div class="exercice-navigation d-flex justify-content-between align-items-center mt-4">
+                        <button id="prev-btn" class="btn btn-outline-primary" disabled>
+                            <i class="bi bi-arrow-left me-2"></i>Exercice précédent
+                        </button>
+
+                        <div class="text-muted">
+                            <i class="bi bi-skip-forward-fill me-1"></i>30 secondes par exercice
+                        </div>
+
+                        
+                    </div>
+
+                    <p class="text-center text-muted small mt-2">
+                        <i class="bi bi-camera-video me-1"></i>
+                        L'exercice suivant démarre automatiquement après 30 secondes
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conseils généraux selon le trimestre -->
+        <div class="general-advice mt-5">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-lightbulb me-2"></i>
+                        Conseils pour le {{ data.title|lower }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if trimestre == '1' %}
+                    <p>💡 <strong>Au premier trimestre</strong> : Écoutez votre corps, reposez-vous beaucoup et
+                        hydratez-vous régulièrement. Les nausées sont fréquentes - fractionnez vos repas.</p>
+                    {% elif trimestre == '2' %}
+                    <p>💡 <strong>Au deuxième trimestre</strong> : Profitez de votre énergie retrouvée pour des
+                        activités modérées. Attention à votre équilibre qui peut être modifié.</p>
+                    {% elif trimestre == '3' %}
+                    <p>💡 <strong>Au troisième trimestre</strong> : Privilégiez le confort, utilisez des coussins pour
+                        vous installer. Évitez les positions allongées sur le dos.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Rappel de sécurité -->
+        <div class="security-alert mt-4">
+            <div class="alert alert-warning">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                        <strong>Important :</strong> Arrêtez immédiatement tout exercice en cas de :
+                        <ul class="mb-0 mt-2">
+                            <li>Douleur ou contraction</li>
+                            <li>Saignement ou perte de liquide</li>
+                            <li>Essoufflement important</li>
+                            <li>Malaise ou vertiges</li>
+                        </ul>
+                        Consultez votre médecin si nécessaire.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="exercices-navigation text-center mt-4">
+            <a href="{% url 'validation_periode' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Modifier ma période
+            </a>
+            <a href="{% url 'services' %}" class="btn btn-secondary ms-2">
+                <i class="bi bi-grid me-2"></i>Retour aux services
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Données des exercices pour JavaScript -->
+<!-- Nouvelle version avec le JSON déjà converti -->
+<script id="exercises-data" type="application/json">
+{{ exercices_json|safe }}
+</script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ========================================
+       STYLES EXISTANTS - LECTEUR VIDÉO
+    ======================================== */
+    .video-wrapper:hover .video-overlay,
+    .video-wrapper:hover .video-controls {
+        opacity: 1 !important;
+    }
+
+    .video-overlay {
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .spinner-grow {
+        animation: spinner-grow 1s linear infinite;
+    }
+
+    @keyframes spinner-grow {
+        0% {
+            transform: scale(0);
+        }
+
+        50% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        100% {
+            transform: scale(0);
+            opacity: 0;
+        }
+    }
+
+    .progress-bar {
+        transition: width 0.1s linear;
+    }
+
+    .exercice-navigation {
+        justify-content: space-between !important;
+    }
+
+    #next-btn {
+        display: inline-block;
+    }
+
+    .benefits-tags .badge {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.8rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    #instructions-list li {
+        margin-bottom: 0.5rem;
+        padding-left: 0.5rem;
+        border-left: 3px solid #28a745;
+    }
+
+    /* ========================================
+       STYLES POUR LE COACH VOCAL (INVISIBLE)
+    ======================================== */
+    @keyframes slideInVocal {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOutVocal {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+
+    /* Rendre les bulles complètement invisibles */
+    .vocal-bubble {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        position: absolute !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('=== LECTEUR SÉQUENTIEL VIDÉOS AVEC COACH VOCAL ===');
+
+        // ===============================================
+        // 1. DONNÉES DES EXERCICES
+        // ===============================================
+        const exercises = JSON.parse(document.getElementById('exercises-data').textContent);
+        console.log('Exercices chargés:', exercises);
+
+        if (!exercises || exercises.length === 0) {
+            console.error('Aucun exercice trouvé');
+            window.location.href = "{% url 'validation_periode' %}";
+            return;
+        }
+
+        // ===============================================
+        // 2. VARIABLES GLOBALES
+        // ===============================================
+        let currentIndex = 0;
+        let timerInterval = null;
+        let remainingTime = 0;
+        let isPaused = false;
+        let videoDuration = 0;
+
+        // Variables pour le coach vocal
+        let breathingReminderSent = false;
+        let halfwayReminderSent = false;
+        let lastEncouragementTime = 0;
+        let welcomeMessageSent = false;
+        let almostThereSent = false;
+        let instructionsRead = false; // Pour ne lire les instructions qu'une fois
+
+        // ===============================================
+        // 3. ÉLÉMENTS DOM
+        // ===============================================
+        const video = document.getElementById('main-video');
+        const videoSource = document.getElementById('video-source');
+        const playPauseBtn = document.getElementById('play-pause-btn');
+        const playPauseIcon = document.getElementById('play-pause-icon');
+        const progressBar = document.getElementById('video-progress');
+        const progressContainer = document.querySelector('.progress-container');
+        const currentTimeSpan = document.getElementById('current-time');
+        const durationSpan = document.getElementById('duration');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const currentExerciseName = document.getElementById('current-exercise-name');
+        const currentExerciseDescription = document.getElementById('current-exercise-description');
+        const currentExerciseCounter = document.getElementById('current-exercise-counter');
+        const instructionsList = document.getElementById('instructions-list');
+        const benefitsTags = document.getElementById('benefits-tags');
+        const timerBar = document.getElementById('exercise-timer-bar');
+        const timerText = document.getElementById('timer-text');
+        const playingIndicator = document.getElementById('playing-indicator');
+        const playbackStatus = document.getElementById('playback-status');
+        const videoErrorMessage = document.getElementById('video-error-message');
+
+        // ===============================================
+        // 4. DONNÉES DES INSTRUCTIONS ET BÉNÉFICES
+        // ===============================================
+        const instructionsData = {
+            'Respiration profonde': [
+                'Inspirez profondément par le nez',
+                'Expirez lentement par la bouche',
+                'Relâchez les épaules'
+            ],
+            'Marche légère': [
+                'Marchez à un rythme modéré',
+                'Gardez le dos droit',
+                'Respirez régulièrement'
+            ],
+            'Yoga prénatal': [
+                'Installez-vous confortablement',
+                'Suivez les mouvements',
+                'Ne forcez jamais'
+            ],
+            'Exercices du plancher pelvien': [
+                'Contractez les muscles',
+                'Maintenez 5 secondes',
+                'Relâchez complètement'
+            ],
+            'Respiration de préparation': [
+                'Inspirez profondément',
+                'Expirez longuement',
+                'Relâchez les tensions'
+            ],
+            'Mouvements du bassin': [
+                'À quatre pattes',
+                'Cambrez doucement',
+                'Arrondissez le dos'
+            ]
+        };
+
+        const benefitsData = {
+            'Respiration profonde': ['Réduction du stress', 'Oxygénation du corps'],
+            'Marche légère': ['Amélioration circulation', 'Maintien du tonus'],
+            'Yoga prénatal': ['Souplesse', 'Détente musculaire'],
+            'Exercices du plancher pelvien': ['Préparation à l\'accouchement', 'Meilleur contrôle'],
+            'Respiration de préparation': ['Gestion de la douleur', 'Relaxation profonde'],
+            'Mouvements du bassin': ['Soulagement du dos', 'Mobilité pelvienne']
+        };
+
+        // ===============================================
+        // 5. COACH VOCAL - SYNTHÈSE VOCALE FÉMININE
+        // ===============================================
+        const vocalCoach = {
+            // Messages d'encouragement
+            messages: {
+                welcome: "Bienvenue dans votre séance d'exercices adaptés. Prenez votre temps et écoutez votre corps.",
+                start: "Commencez l'exercice en douceur.",
+                halfway: "Vous êtes à la moitié de l'exercice, continuez comme ça !",
+                breathing: "N'oubliez pas de respirer profondément et régulièrement.",
+                almostThere: "Plus que quelques secondes, vous êtes formidable !",
+                nextExercise: "Passons à l'exercice suivant.",
+                lastOne: "Dernier exercice, vous assurez !",
+                congratulations: "Félicitations ! Vous avez terminé tous les exercices. Reposez-vous bien.",
+                encouragements: [
+                    "Bravo, vous faites du très bon travail !",
+                    "Continuez comme ça, vous êtes formidable !",
+                    "Votre bébé vous remercie pour ces exercices.",
+                    "Vous êtes une super maman !",
+                    "Allez-y doucement, vous gérez comme une championne !",
+                    "Respirez tranquillement, tout va bien.",
+                    "Vous pouvez être fière de vous !"
+                ]
+            },
+
+            // Fonction pour arrêter la parole immédiatement
+            stop: function () {
+                if (window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                    console.log('🛑 Parole arrêtée');
+                }
+            },
+
+            // Fonction pour parler
+            speak: function (text) {
+                if (!window.speechSynthesis) {
+                    console.log('Synthèse vocale non supportée');
+                    return;
+                }
+
+                // Vérifier si la vidéo est toujours en cours
+                if (video.paused || video.ended) {
+                    console.log('Vidéo en pause ou terminée, pas de voix');
+                    return;
+                }
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'fr-FR';
+                utterance.rate = 0.8;        // Plus lent pour bien comprendre
+                utterance.pitch = 1.2;        // Voix féminine
+                utterance.volume = 0.9;        // Volume confortable
+
+                // Événements pour suivre l'état de la synthèse
+                utterance.onstart = function () {
+                    console.log('🎤 Début de la phrase:', text.substring(0, 30) + '...');
+                };
+
+                utterance.onend = function () {
+                    console.log('✅ Fin de la phrase');
+                };
+
+                utterance.onerror = function (event) {
+                    console.error('❌ Erreur de synthèse:', event);
+                };
+
+                const voices = window.speechSynthesis.getVoices();
+
+                if (voices.length === 0) {
+                    window.speechSynthesis.addEventListener('voiceschanged', () => {
+                        this.setFrenchFemaleVoice(utterance);
+                        window.speechSynthesis.speak(utterance);
+                    }, { once: true });
+                } else {
+                    this.setFrenchFemaleVoice(utterance);
+                    window.speechSynthesis.speak(utterance);
+                }
+            },
+
+            // Choisir une voix féminine française
+            setFrenchFemaleVoice: function (utterance) {
+                const voices = window.speechSynthesis.getVoices();
+
+                const frenchFemaleVoices = voices.filter(voice =>
+                    voice.lang.includes('fr') &&
+                    (voice.name.includes('Female') ||
+                        voice.name.includes('Audrey') ||
+                        voice.name.includes('Julie') ||
+                        voice.name.includes('Amélie') ||
+                        voice.name.includes('Marie') ||
+                        voice.name.includes('Google français') ||
+                        (voice.name.includes('Microsoft') && voice.name.includes('France')))
+                );
+
+                if (frenchFemaleVoices.length > 0) {
+                    utterance.voice = frenchFemaleVoices[0];
+                    console.log('Voix sélectionnée:', frenchFemaleVoices[0].name);
+                } else {
+                    const frenchVoice = voices.find(voice => voice.lang.includes('fr'));
+                    if (frenchVoice) {
+                        utterance.voice = frenchVoice;
+                    }
+                }
+            },
+
+            // Lire les instructions d'un exercice
+            readInstructions: function (exerciseName) {
+                const instructions = instructionsData[exerciseName];
+                if (instructions && instructions.length > 0) {
+                    // Construire une phrase avec toutes les instructions
+                    let text = "Instructions : ";
+                    instructions.forEach((instruction, index) => {
+                        text += instruction;
+                        if (index < instructions.length - 1) {
+                            text += ". ";
+                        } else {
+                            text += ". ";
+                        }
+                    });
+                    this.speak(text);
+                }
+            },
+
+            // Lire les bénéfices d'un exercice
+            readBenefits: function (exerciseName) {
+                const benefits = benefitsData[exerciseName];
+                if (benefits && benefits.length > 0) {
+                    // Construire une phrase avec tous les bénéfices
+                    let text = "Bénéfices de cet exercice : ";
+                    benefits.forEach((benefit, index) => {
+                        text += benefit;
+                        if (index < benefits.length - 1) {
+                            text += ", ";
+                        } else {
+                            text += ".";
+                        }
+                    });
+                    this.speak(text);
+                }
+            },
+
+            // Message aléatoire d'encouragement
+            randomEncouragement: function () {
+                // Vérifier que la vidéo est toujours en cours
+                if (video.paused || video.ended) return;
+
+                const randomIndex = Math.floor(Math.random() * this.messages.encouragements.length);
+                this.speak(this.messages.encouragements[randomIndex]);
+            },
+
+            // Message spécifique
+            say: function (messageKey) {
+                // Vérifier que la vidéo est toujours en cours
+                if (video.paused || video.ended) return;
+
+                if (this.messages[messageKey]) {
+                    this.speak(this.messages[messageKey]);
+                }
+            }
+        };
+
+        // ===============================================
+        // 6. FONCTIONS DE GESTION DU TEMPS
+        // ===============================================
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function startTimer() {
+            stopTimer();
+
+            timerInterval = setInterval(() => {
+                if (!isPaused && video.duration) {
+                    remainingTime = video.duration - video.currentTime;
+                    updateTimerDisplay();
+                }
+            }, 100);
+        }
+
+        function updateTimerDisplay() {
+            if (timerBar && video.duration) {
+                const percent = (video.currentTime / video.duration) * 100;
+                timerBar.style.width = percent + '%';
+                timerText.textContent = Math.ceil(video.duration - video.currentTime) + 's';
+            }
+
+            currentTimeSpan.textContent = formatTime(video.currentTime);
+
+            if (video.duration) {
+                durationSpan.textContent = formatTime(video.duration);
+            }
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return mins + ':' + (secs < 10 ? '0' : '') + secs;
+        }
+
+        // ===============================================
+        // 7. FONCTIONS D'INTERFACE UTILISATEUR
+        // ===============================================
+        function updatePlaybackUI(isVideoPlaying) {
+            if (isVideoPlaying) {
+                playPauseIcon.className = 'bi bi-pause-fill fs-1';
+                playingIndicator.style.display = 'inline-block';
+                playbackStatus.textContent = 'Lecture en cours';
+            } else {
+                playPauseIcon.className = 'bi bi-play-fill fs-1';
+                playingIndicator.style.display = 'none';
+                playbackStatus.textContent = 'En pause';
+            }
+        }
+
+        // ===============================================
+        // 8. FONCTIONS DE NAVIGATION
+        // ===============================================
+        function goToNextExercise() {
+            // Arrêter la voix avant de changer d'exercice
+            vocalCoach.stop();
+
+            if (currentIndex < exercises.length - 1) {
+                currentIndex++;
+                loadExercise(currentIndex);
+            }
+        }
+
+        // ===============================================
+        // 9. FONCTION PRINCIPALE DE CHARGEMENT
+        // ===============================================
+        function loadExercise(index) {
+            console.log(`Chargement exercice ${index + 1}/${exercises.length}:`, exercises[index].nom);
+            const exercise = exercises[index];
+
+            stopTimer();
+
+            // Réinitialiser les flags du coach vocal
+            breathingReminderSent = false;
+            halfwayReminderSent = false;
+            almostThereSent = false;
+            lastEncouragementTime = 0;
+            instructionsRead = false;
+
+            // Arrêter toute voix en cours
+            vocalCoach.stop();
+
+            video.pause();
+
+            // Construction du chemin vidéo
+            let videoPath;
+            if (exercise.video.includes('assets/') || exercise.video.includes('videos/')) {
+                videoPath = exercise.video;
+            } else {
+                videoPath = `assets/videos/${exercise.video}`;
+            }
+
+            const fullVideoPath = `/static/${videoPath}`;
+            console.log('Chemin vidéo final:', fullVideoPath);
+
+            videoSource.src = fullVideoPath;
+            video.load();
+
+            // Mise à jour des informations
+            currentExerciseName.textContent = exercise.nom;
+            currentExerciseDescription.textContent = exercise.description;
+            currentExerciseCounter.textContent = `Exercice ${index + 1}/${exercises.length}`;
+
+            // Instructions
+            const instr = instructionsData[exercise.nom] || ['Suivez les mouvements de la vidéo'];
+            instructionsList.innerHTML = instr.map(i =>
+                `<li><i class="bi bi-check-circle-fill text-success me-2"></i>${i}</li>`
+            ).join('');
+
+            // Bénéfices
+            const benefits = benefitsData[exercise.nom] || ['Bien-être général'];
+            benefitsTags.innerHTML = benefits.map(b =>
+                `<span class="badge bg-success me-1 mb-1">${b}</span>`
+            ).join('');
+
+            // Navigation
+            prevBtn.disabled = index === 0;
+            nextBtn.disabled = index === exercises.length - 1;
+
+            // Réinitialisation de l'affichage
+            currentTimeSpan.textContent = '0:00';
+            durationSpan.textContent = '0:00';
+            if (timerBar) timerBar.style.width = '0%';
+            timerText.textContent = '0s';
+
+            // Lecture automatique
+            video.play()
+                .then(() => {
+                    console.log('✅ VIDÉO JOUÉE AUTOMATIQUEMENT');
+                    updatePlaybackUI(true);
+                    isPaused = false;
+
+                    // Messages vocaux selon le contexte
+                    if (index === 0 && !welcomeMessageSent) {
+                        // Message de bienvenue
+                        setTimeout(() => vocalCoach.say('welcome'), 1000);
+                        setTimeout(() => {
+                            vocalCoach.readInstructions(exercise.nom);
+                        }, 6000);
+                        setTimeout(() => {
+                            vocalCoach.readBenefits(exercise.nom);
+                        }, 10000);
+                        setTimeout(() => vocalCoach.say('start'), 14000);
+                        welcomeMessageSent = true;
+                    } else {
+                        // Pour les autres exercices
+                        setTimeout(() => vocalCoach.say('nextExercise'), 1000);
+                        setTimeout(() => {
+                            vocalCoach.readInstructions(exercise.nom);
+                        }, 4000);
+                        setTimeout(() => {
+                            vocalCoach.readBenefits(exercise.nom);
+                        }, 8000);
+                        setTimeout(() => vocalCoach.randomEncouragement(), 12000);
+                    }
+                })
+                .catch(e => {
+                    console.log('❌ Auto-play bloqué:', e);
+                    updatePlaybackUI(false);
+                    playbackStatus.textContent = 'Cliquez pour démarrer';
+                    isPaused = true;
+                });
+        }
+
+        // ===============================================
+        // 10. ÉCOUTEURS D'ÉVÉNEMENTS VIDÉO
+        // ===============================================
+        video.addEventListener('loadedmetadata', () => {
+            console.log('Métadonnées chargées, durée:', video.duration);
+            videoDuration = video.duration;
+            durationSpan.textContent = formatTime(video.duration);
+            remainingTime = video.duration;
+            updateTimerDisplay();
+        });
+
+        video.addEventListener('timeupdate', () => {
+            updateTimerDisplay();
+
+            // Coach vocal pendant l'exercice
+            if (video.duration && !isPaused && !video.paused && !video.ended) {
+                const progress = video.currentTime / video.duration;
+                const currentTime = video.currentTime;
+
+                if (progress > 0.3 && !breathingReminderSent) {
+                    vocalCoach.say('breathing');
+                    breathingReminderSent = true;
+                }
+
+                if (progress > 0.5 && !halfwayReminderSent) {
+                    vocalCoach.say('halfway');
+                    halfwayReminderSent = true;
+                }
+
+                if (currentTime - lastEncouragementTime > 20 && progress > 0.2 && progress < 0.85) {
+                    vocalCoach.randomEncouragement();
+                    lastEncouragementTime = currentTime;
+                }
+
+                if (video.duration - currentTime < 5 && progress > 0.9 && !almostThereSent) {
+                    vocalCoach.say('almostThere');
+                    almostThereSent = true;
+                }
+            }
+        });
+
+        video.addEventListener('play', () => {
+            console.log('▶️ VIDÉO JOUÉE');
+            updatePlaybackUI(true);
+            isPaused = false;
+            startTimer();
+        });
+
+        video.addEventListener('pause', () => {
+            console.log('⏸️ VIDÉO EN PAUSE');
+            updatePlaybackUI(false);
+            isPaused = true;
+            stopTimer();
+            // Ne pas arrêter la voix quand on met en pause
+        });
+
+        video.addEventListener('ended', () => {
+            console.log('🏁 Vidéo terminée');
+            stopTimer();
+
+            // ARRÊTER LA VOIX IMMÉDIATEMENT
+            vocalCoach.stop();
+
+            if (currentIndex === exercises.length - 1) {
+                setTimeout(() => vocalCoach.say('congratulations'), 500);
+                updatePlaybackUI(false);
+                playbackStatus.textContent = 'Séance terminée';
+                timerText.textContent = 'Fini !';
+                nextBtn.disabled = true;
+            } else {
+                goToNextExercise();
+            }
+        });
+
+        video.addEventListener('waiting', () => {
+            console.log('⏳ Vidéo en attente de chargement...');
+        });
+
+        video.addEventListener('stalled', () => {
+            console.log('⚠️ Chargement vidéo bloqué');
+        });
+
+        video.addEventListener('error', (e) => {
+            console.error('❌ Erreur de chargement vidéo:', video.error);
+            videoErrorMessage.style.display = 'block';
+            setTimeout(() => {
+                videoErrorMessage.style.display = 'none';
+            }, 3000);
+        });
+
+        // ===============================================
+        // 11. CONTRÔLES UTILISATEUR
+        // ===============================================
+        playPauseBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        });
+
+        video.addEventListener('click', (e) => {
+            if (!e.target.closest('button')) {
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            }
+        });
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            if (video.duration) {
+                video.currentTime = pos * video.duration;
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                // Arrêter la voix avant de changer
+                vocalCoach.stop();
+                currentIndex--;
+                loadExercise(currentIndex);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < exercises.length - 1) {
+                // Arrêter la voix avant de changer
+                vocalCoach.stop();
+                currentIndex++;
+                loadExercise(currentIndex);
+            }
+        });
+
+        // ===============================================
+        // 12. INITIALISATION
+        // ===============================================
+        console.log('Démarrage du premier exercice');
+        loadExercise(0);
+
+        // Nettoyage
+        window.addEventListener('beforeunload', () => {
+            vocalCoach.stop();
+            stopTimer();
+        });
+    });
+</script>
+{% endblock %}

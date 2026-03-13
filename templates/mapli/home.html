@@ -1,0 +1,1225 @@
+{% extends 'mapli/base.html' %}
+{% load static %}
+{% block title %}MaPli - Votre compagnon de grossesse{% endblock %}
+
+{% block content %}
+<main class="main" id="main">
+        <!-- Hero Section -->
+        <section id="hero" class="hero section dark-background">
+            <div class="container-fluid p-0">
+                <div class="hero-wrapper">
+                    <div class="hero-image">
+                        <img src="{% static 'assets/img/health/woman-imgco.png' %}" alt="Accompagnement grossesse MaPli"
+                            class="img-fluid">
+                    </div>
+    
+                    <div class="hero-content">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-7 col-md-10" data-aos="fade-right" data-aos-delay="100">
+                                    <div class="content-box">
+                                        <span class="badge-accent" data-aos="fade-up" data-aos-delay="150">
+                                            Développé avec des professionnels de santé
+                                        </span>
+                                        <h1 data-aos="fade-up" data-aos-delay="200">
+                                            Suivez votre grossesse en toute sérénité
+                                        </h1>
+                                        <p data-aos="fade-up" data-aos-delay="250">
+                                            Parce que chaque grossesse est unique, MaPli vous accompagne chaque jour avec
+                                            bienveillance grâce à une plateforme développée avec des professionnels de
+                                            santé.
+                                        </p>
+    
+                                        <div class="cta-group" data-aos="fade-up" data-aos-delay="300">
+                                            <a href="{% url 'appoint' %}" class="btn btn-primary">
+                                                <i class="bi bi-calendar-check me-2"></i>
+                                                Prendre rendez-vous échographie
+                                            </a>
+                                            <a href="{% url 'services' %}" class="btn btn-outline">
+                                                <i class="bi bi-heart-pulse me-2"></i>
+                                                Découvrir nos services
+                                            </a>
+                                        </div>
+    
+                                        <div class="info-badges" data-aos="fade-up" data-aos-delay="350">
+                                            <div class="badge-item">
+                                                <i class="bi bi-whatsapp"></i>
+                                                <div class="badge-content">
+                                                    <span>Contact direct</span>
+                                                    <strong>+257 71028181</strong>
+                                                </div>
+                                            </div>
+                                            <div class="badge-item">
+                                                <i class="bi bi-clock-fill"></i>
+                                                <div class="badge-content">
+                                                    <span>Disponibilité</span>
+                                                    <strong>Support 24h/24</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+    
+                            <div class="features-wrapper">
+                                <div class="row gy-4">
+                                    <div class="col-lg-4">
+                                        <div class="feature-item" data-aos="fade-up" data-aos-delay="450">
+                                            <div class="feature-icon">
+                                                <i class="bi bi-chat-dots-fill"></i>
+                                            </div>
+                                            <div class="feature-text">
+                                                <h3>Conseils Personnalisés</h3>
+                                                <p>Des recommandations adaptées à chaque étape de votre grossesse par des
+                                                    professionnels.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="feature-item" data-aos="fade-up" data-aos-delay="500">
+                                            <div class="feature-icon">
+                                                <i class="bi bi-bell-fill"></i>
+                                            </div>
+                                            <div class="feature-text">
+                                                <h3>Notifications Quotidiennes</h3>
+                                                <p>Un suivi régulier avec rappels et conseils pour ne rien oublier durant
+                                                    votre grossesse.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="feature-item" data-aos="fade-up" data-aos-delay="550">
+                                            <div class="feature-icon">
+                                                <i class="bi bi-shield-plus"></i>
+                                            </div>
+                                            <div class="feature-text">
+                                                <h3>Rappel Vaccins</h3>
+                                                <p>Suivi vaccinal complet pour la mère et l'enfant avec rappels
+                                                    automatiques.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!-- /Hero Section -->
+
+    <!-- Home About Section - Style MediTrust -->
+    <section id="home-about" class="home-about section">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row gy-5 align-items-center">
+                <div class="col-lg-6" data-aos="fade-right" data-aos-delay="200">
+                    <div class="about-image">
+                        <img src="{% static 'assets/img/health/woman-imgco.png' %}" alt="Accompagnement grossesse MaPli"
+                            class="img-fluid rounded-3 mb-4">
+                        <div class="experience-badge">
+                            <span class="years">100%</span>
+                            <span class="text">Dédié à votre bien-être</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="col-lg-6" data-aos="fade-left" data-aos-delay="300">
+                    <div class="about-content">
+                        <h2>Votre compagnon de grossesse bienveillant</h2>
+                        <p class="lead">
+                            Une plateforme spécialisée développée avec des professionnels de santé pour vous accompagner
+                            jour après jour.
+                        </p>
+    
+                        <p>
+                            MaPli transforme votre expérience de grossesse en un parcours serein et épanouissant. Nous
+                            combinons expertise médicale et support personnalisé pour répondre à tous vos besoins durant
+                            cette belle aventure.
+                        </p>
+    
+                        <div class="row g-4 mt-4">
+                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
+                                <div class="feature-item">
+                                    <div class="icon">
+                                        <i class="bi bi-heart-fill"></i>
+                                    </div>
+                                    <h4>Accompagnement Bienveillant</h4>
+                                    <p>Écoute et compréhension de vos besoins spécifiques à chaque étape.</p>
+                                </div>
+                            </div>
+    
+                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="500">
+                                <div class="feature-item">
+                                    <div class="icon">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <h4>Expertise Validée</h4>
+                                    <p>Conseils approuvés par des professionnels de santé pour votre sécurité.</p>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <div class="cta-wrapper mt-4">
+                            <a href="{% url 'about' %}" class="btn btn-primary">
+                                En savoir plus sur nous
+                            </a>
+                            <a href="https://wa.me/25771028181" class="btn btn-outline btn-sm" target="_blank">
+                                <i class="bi bi-whatsapp me-2"></i>nous contacter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Home About Section -->
+    
+    <!-- Featured Services Section - Style MediTrust -->
+    <section id="featured-services" class="featured-services section light-background">
+        <!-- Section Title -->
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Services</h2>
+            <p>Nos services médicaux spécialisés pour répondre à tous vos besoins de santé</p>
+        </div><!-- End Section Title -->
+    
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row gy-4">
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="200">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-person-check-fill"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Conseils Personnalisés</h3>
+                            <p>Recommandations adaptées à votre profil et à l'avancement de votre grossesse, élaborées avec
+                                des
+                                professionnels de santé.</p>
+                            <ul class="service-features">
+                                <li><i class="bi bi-check-circle-fill"></i>Suivi personnalisé selon votre trimestre</li>
+                                <li><i class="bi bi-check-circle-fill"></i>Réponses à vos questions spécifiques</li>
+                                <li><i class="bi bi-check-circle-fill"></i>Recommandations individualisées</li>
+                            </ul>
+                            <a href="{% url 'services' %}" class="service-btn">
+                                En savoir plus
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div><!-- End Service Card -->
+    
+    
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="300">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-bell-fill"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Notifications Quotidiennes</h3>
+                            <p>Un suivi régulier avec des rappels et conseils quotidiens pour ne rien oublier durant votre
+                                grossesse.
+                            </p>
+                            <ul class="service-features">
+                                <li><i class="bi bi-check-circle-fill"></i>Rappels de rendez-vous médicaux</li>
+                                <li><i class="bi bi-check-circle-fill"></i>Conseils de santé au quotidien</li>
+                                <li><i class="bi bi-check-circle-fill"></i>Alertes personnalisées</li>
+                            </ul>
+                            <a href="{% url 'services' %}" class="service-btn">
+                                En savoir plus
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div><!-- End Service Card -->
+    
+    
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="400">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-heart-pulse"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Suivi Nutrition & Bien-être</h3>
+                            <p>Informations complètes sur la nutrition, l'humeur et les exercices adaptés spécifiquement à
+                                la grossesse.
+                            </p>
+                            <ul class="service-features">
+                                <li><i class="bi bi-check-circle-fill"></i>Guide nutritionnel par trimestre</li>
+                                <li><i class="bi bi-check-circle-fill"></i>Exercices adaptés et sécuritaires</li>
+                                <li><i class="bi bi-check-circle-fill"></i>Conseils pour le bien-être mental</li>
+                            </ul>
+                            <a href="{% url 'services' %}" class="service-btn">
+                                En savoir plus
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div><!-- End Service Card -->
+    
+    
+                <div class="col-lg-6" data-aos="fade-up" data-aos-delay="500">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <i class="bi bi-calendar2-check-fill"></i>
+                        </div>
+                        <div class="service-content">
+                            <h3>Rendez-vous en Ligne</h3>
+                            <p>Prise de rendez-vous simplifiée pour vos échographies et consultations médicales avec nos
+                                partenaires.
+                            </p>
+                            <ul class="service-features">
+                                <li><i class="bi bi-check-circle-fill"></i>Réservation d'échographie en ligne</li>
+                                <li><i class="bi bi-check-circle-fill"></i>Rappels automatiques</li>
+                                <li><i class="bi bi-check-circle-fill"></i>Annulation facile si besoin</li>
+                            </ul>
+                            <a href="{% url 'appoint' %}" class="service-btn">
+                                Prendre rendez-vous
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div><!-- End Service Card -->
+            </div>
+        </div>
+    </section><!-- /Featured Services Section -->
+    
+    <!-- Vaccination Reminder Section - Style MediTrust -->
+    <section id="vaccination" class="vaccination section primary-background">
+        <div class="container" data-aos="fade-up">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="vaccination-content">
+                        <h2>Rappel pour les Vaccins</h2>
+                        <p class="lead">Ne manquez aucun vaccin essentiel pour la santé de la mère et de l'enfant.</p>
+                        <p>Notre système de rappel automatique vous assure une protection optimale tout au long de votre
+                            grossesse et après l'accouchement.</p>
+                        <div class="vaccination-features">
+                            <div class="feature">
+                                <i class="bi bi-check-lg"></i>
+                                <span>Vaccins de la grossesse</span>
+                            </div>
+                            <div class="feature">
+                                <i class="bi bi-check-lg"></i>
+                                <span>Vaccins du nouveau-né</span>
+                            </div>
+                            <div class="feature">
+                                <i class="bi bi-check-lg"></i>
+                                <span>Rappels automatiques</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="vaccination-image" data-aos="zoom-in" data-aos-delay="200">
+                        <img src="{% static 'assets/img/health/vaccination.jpg' %}" alt="Suivi vaccinal grossesse"
+                            class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Vaccination Reminder Section -->
+    
+    
+    <!-- Find A Doctor Section - Style MediTrust -->
+    <section id="find-a-doctor" class="find-a-doctor section">
+        <!-- Section Title -->
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Trouver un Médecin</h2>
+            <p>Consultez notre équipe de médecins experts et prenez rendez-vous facilement</p>
+        </div><!-- End Section Title -->
+    
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
+                <div class="col-lg-12">
+                    <div class="search-container">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="doctor_name"
+                                    placeholder="Nom du médecin ou mot-clé">
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" name="specialty" id="specialty-select">
+                                    <option value="">Choisir une spécialité</option>
+                                    <option value="cardiology">Cardiologie</option>
+                                    <option value="neurology">Neurologie</option>
+                                    <option value="orthopedics">Orthopédie</option>
+                                    <option value="pediatrics">Pédiatrie</option>
+                                    <option value="dermatology">Dermatologie</option>
+                                    <option value="oncology">Oncologie</option>
+                                    <option value="surgery">Chirurgie</option>
+                                    <option value="emergency">Médecine d'urgence</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search me-2"></i>Rechercher un médecin
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="row" data-aos="fade-up" data-aos-delay="400">
+                <!-- Doctor Cards - Les noms restent en anglais car ce sont des noms propres -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="doctor-card">
+                        <div class="doctor-image">
+                            <img src="{% static 'assets/img/health/staff-3.webp' %}" alt="Dr. Sarah Mitchell"
+                                class="img-fluid">
+                            <div class="availability-badge online">Disponible</div>
+                        </div>
+                        <div class="doctor-info">
+                            <h5>Dr. Sarah Mitchell</h5>
+                            <p class="specialty">Cardiologie</p>
+                            <p class="experience">15+ ans d'expérience</p>
+                            <div class="rating">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <span class="rating-text">(4.9)</span>
+                            </div>
+                            <div class="appointment-actions">
+                                <a href="#" class="btn btn-outline-primary btn-sm">Voir le profil</a>
+                                <a href="#" class="btn btn-primary btn-sm">Prendre rendez-vous</a>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End Doctor Card -->
+    
+                <!-- Répétez le même pattern pour les autres cartes de médecins -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="doctor-card">
+                        <div class="doctor-image">
+                            <img src="{% static 'assets/img/health/staff-7.webp' %}" alt="Dr. Michael Rodriguez"
+                                class="img-fluid">
+                            <div class="availability-badge busy">En chirurgie</div>
+                        </div>
+                        <div class="doctor-info">
+                            <h5>Dr. Michael Rodriguez</h5>
+                            <p class="specialty">Neurologie</p>
+                            <p class="experience">12+ ans d'expérience</p>
+                            <div class="rating">
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-fill"></i>
+                                <i class="bi bi-star-half"></i>
+                                <span class="rating-text">(4.7)</span>
+                            </div>
+                            <div class="appointment-actions">
+                                <a href="#" class="btn btn-outline-primary btn-sm">Voir le profil</a>
+                                <a href="#" class="btn btn-primary btn-sm">Prendre rendez-vous</a>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End Doctor Card -->
+    
+                <!-- Continuez avec les autres médecins... -->
+            </div>
+        </div>
+    </section><!-- /Find A Doctor Section -->
+    
+    <!-- Contact Info Section - Style MediTrust -->
+    <section id="contact-info" class="contact-info section">
+        <div class="container" data-aos="fade-up">
+            <div class="section-title">
+                <h2>Contactez-Nous</h2>
+                <p>Nous sommes à votre écoute pour toute question concernant votre grossesse</p>
+            </div>
+            <div class="row text-center">
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                    <div class="contact-item">
+                        <i class="bi bi-telephone-fill"></i>
+                        <h4>Téléphone</h4>
+                        <p>+257 71028181<br>+257 66438851</p>
+                        <a href="tel:+25771028181" class="btn btn-outline btn-sm">Appeler maintenant</a>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                    <div class="contact-item">
+                        <i class="bi bi-whatsapp"></i>
+                        <h4>WhatsApp</h4>
+                        <p>Contact direct et rapide</p>
+                        <a href="https://wa.me/25771028181" class="btn btn-outline btn-sm" target="_blank">
+                            <i class="bi bi-whatsapp me-2"></i>Envoyer un message
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                    <div class="contact-item">
+                        <i class="bi bi-geo-alt-fill"></i>
+                        <h4>Adresse</h4>
+                        <p>Kigobe Nord, Avenue Dama, n° 12</p>
+                        <a href="{% url 'contact' %}" class="btn btn-outline btn-sm">Voir sur la carte</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Contact Info Section -->
+    
+    
+    <!-- Call To Action Section - Style MediTrust -->
+    <section id="call-to-action" class="call-to-action section">
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h2 data-aos="fade-up" data-aos-delay="200">Votre santé est notre priorité</h2>
+                    <p data-aos="fade-up" data-aos-delay="250">
+                        Nous nous engageons à fournir des soins médicaux exceptionnels dans un environnement bienveillant et
+                        professionnel.
+                    </p>
+    
+                    <div class="cta-buttons" data-aos="fade-up" data-aos-delay="300">
+                        <a href="{% url 'appoint' %}" class="btn-primary">Prendre rendez-vous</a>
+                        <a href="{% url 'doctors' %}" class="btn-secondary">Trouver un médecin</a>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="row features-row" data-aos="fade-up" data-aos-delay="400">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-heart-pulse"></i>
+                        </div>
+                        <h5>Soins d'urgence 24h/24</h5>
+                        <p>Services d'urgence disponibles en permanence pour répondre à tous vos besoins médicaux urgents.
+                        </p>
+                        <a href="#" class="feature-link">
+                            <span>En savoir plus</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+    
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <h5>Réservation en ligne facile</h5>
+                        <p>Prenez rendez-vous facilement en ligne à tout moment, selon vos disponibilités.</p>
+                        <a href="{% url 'appoint' %}" class="feature-link">
+                            <span>Réserver maintenant</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+    
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="feature-card">
+                        <div class="icon-wrapper">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h5>Équipe médicale experte</h5>
+                        <p>Notre équipe de médecins certifiés et expérimentés est dédiée à votre bien-être.</p>
+                        <a href="{% url 'doctors' %}" class="feature-link">
+                            <span>Rencontrer nos médecins</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+    
+            <div class="emergency-alert" data-aos="zoom-in" data-aos-delay="500">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <div class="emergency-content">
+                            <div class="emergency-icon">
+                                <i class="bi bi-telephone-fill"></i>
+                            </div>
+                            <div class="emergency-text">
+                                <h4>Urgence médicale ?</h4>
+                                <p>Appelez notre hotline d'urgence 24h/24 pour une assistance immédiate</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-end">
+                        <a href="tel:911" class="emergency-btn">
+                            <i class="bi bi-telephone-fill"></i>
+                            Appeler 71028181
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Call To Action Section -->
+    
+    <!-- Emergency Info Section - Style MediTrust -->
+    <section id="emergency-info" class="emergency-info section">
+        <!-- Section Title -->
+        <div class="container section-title" data-aos="fade-up">
+            <h2>Informations d'urgence</h2>
+            <p>Ressources et contacts essentiels pour les situations d'urgence médicale</p>
+        </div><!-- End Section Title -->
+    
+        <div class="container" data-aos="fade-up" data-aos-delay="100">
+            <div class="row">
+                <div class="col-lg-8 col-md-10 mx-auto">
+                    <!-- Emergency Alert Banner -->
+                    <div class="emergency-alert" data-aos="zoom-in" data-aos-delay="100">
+                        <div class="alert-icon">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                        <div class="alert-content">
+                            <h3>Urgence médicale ?</h3>
+                            <p>Si vous vivez une urgence mettant votre vie en danger, appelez le 71028181 immédiatement ou
+                                rendez-vous à la salle d'urgence la plus proche.</p>
+                        </div>
+                        <div class="alert-action">
+                            <a href="tel:911" class="btn btn-emergency"><!--revoir quel numéro mettre-->
+                                <i class="bi bi-telephone-fill"></i>
+                                Appeler le 71028181
+                            </a>
+                        </div>
+                    </div><!-- End Emergency Alert -->
+                </div>
+            </div>
+        </div>
+    </section><!-- /Emergency Info Section -->
+</main>
+{% endblock %}
+{% block extra_css %}
+<style>
+    /* ===== DESIGN ULTRA-PROFESSIONNEL & HARMONISÉ ===== */
+
+    /* Variables de couleurs harmonieuses */
+    :root {
+        --primary-color: #667EEA;
+        --secondary-color: #764BA2;
+        --accent-color: #FF6B6B;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --text-primary: #1F2937;
+        --text-secondary: #6B7280;
+        --text-light: #9CA3AF;
+        --bg-light: #F8FAFC;
+        --bg-white: #FFFFFF;
+        --border-color: #E5E7EB;
+
+        /* Nouvelles variables pour l'harmonie */
+        --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, #FF8E53 100%);
+        --gradient-success: linear-gradient(135deg, var(--success-color) 0%, #34D399 100%);
+        --gradient-light: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+
+        /* Ombres harmonisées */
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+        --shadow-large: 0 20px 50px rgba(0, 0, 0, 0.15);
+        --shadow-hover: 0 25px 60px rgba(0, 0, 0, 0.18);
+
+        /* Bordures */
+        --border-radius-sm: 12px;
+        --border-radius-md: 20px;
+        --border-radius-lg: 28px;
+        --border-gentle: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* Reset et base harmonisée */
+    .section {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s ease;
+    }
+
+    /* Typographie harmonieuse */
+    .section-title {
+        position: relative;
+        padding-bottom: 4rem;
+        margin-bottom: 5rem;
+        text-align: center;
+    }
+
+    .section-title h2 {
+        font-size: 3.2rem;
+        font-weight: 300;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.8px;
+        line-height: 1.1;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        display: inline-block;
+    }
+
+    .section-title h2::before {
+        content: '';
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 4px;
+        opacity: 0.8;
+    }
+
+    .section-title h2::after {
+        content: '';
+        position: absolute;
+        bottom: -25px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 2px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+        opacity: 0.3;
+    }
+
+    .section-title p {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        max-width: 700px;
+        margin: 3rem auto 0;
+        line-height: 1.7;
+        font-weight: 350;
+        letter-spacing: 0.3px;
+    }
+
+    /* Hero Section - Design Premium */
+    .hero {
+        background: linear-gradient(135deg, var(--bg-light) 0%, #FFFFFF 50%, #F1F5F9 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .badge-accent {
+        background: var(--gradient-accent);
+        color: white;
+        padding: 0.8rem 1.5rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        display: inline-block;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-soft);
+        border: var(--border-gentle);
+        backdrop-filter: blur(10px);
+    }
+
+    /* Home About Section - Design Luxueux */
+    .home-about {
+        background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
+        position: relative;
+    }
+
+    .home-about::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, var(--primary-color) 50%, transparent 100%);
+        opacity: 0.1;
+    }
+
+    .about-image {
+        position: relative;
+        border-radius: var(--border-radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-large);
+        transform: perspective(1000px) rotateY(-5deg);
+        transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .about-image:hover {
+        transform: perspective(1000px) rotateY(0deg) scale(1.02);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .experience-badge {
+        position: absolute;
+        bottom: 40px;
+        right: 40px;
+        background: var(--gradient-primary);
+        color: white;
+        padding: 2.5rem;
+        border-radius: var(--border-radius-md);
+        text-align: center;
+        box-shadow: var(--shadow-large);
+        z-index: 2;
+        backdrop-filter: blur(15px);
+        border: var(--border-gentle);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-12px) rotate(2deg);
+        }
+    }
+
+    /* Cards Design Harmonisé */
+    .department-card,
+    .service-card,
+    .feature-card,
+    .doctor-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.8) 100%);
+        border-radius: var(--border-radius-md);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(15px);
+        box-shadow: var(--shadow-soft);
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .department-card::before,
+    .service-card::before,
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.7s;
+    }
+
+    .department-card:hover::before,
+    .service-card:hover::before,
+    .feature-card:hover::before {
+        left: 100%;
+    }
+
+    .department-card:hover,
+    .service-card:hover,
+    .feature-card:hover,
+    .doctor-card:hover {
+        transform: translateY(-12px) scale(1.02);
+        box-shadow: var(--shadow-hover);
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    /* Icônes harmonisées */
+    .feature-item .icon,
+    .service-icon,
+    .department-icon {
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: var(--border-radius-sm);
+        box-shadow: 0 12px 30px rgba(102, 126, 234, 0.3);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .feature-item:hover .icon,
+    .service-card:hover .service-icon,
+    .department-card:hover .department-icon {
+        transform: scale(1.15) rotate(8deg);
+        box-shadow: 0 20px 50px rgba(102, 126, 234, 0.4);
+    }
+
+    /* Boutons harmonisés */
+    .btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: var(--border-radius-sm);
+        padding: 1.25rem 2.5rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        box-shadow: var(--shadow-soft);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn-primary:hover::before {
+        left: 100%;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        border-radius: var(--border-radius-sm);
+        padding: 1.25rem 2.5rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-outline:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-soft);
+    }
+
+    /* Section Vaccination - Design Premium */
+    .primary-background {
+        background: var(--gradient-primary);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .primary-background::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    /* Animations fluides et harmonieuses */
+    [data-aos] {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: all 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    [data-aos].aos-animate {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Effets de hover subtils */
+    .feature-item,
+    .contact-item {
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        border: 1px solid transparent;
+    }
+
+    .feature-item:hover,
+    .contact-item:hover {
+        border-color: rgba(102, 126, 234, 0.1);
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-medium);
+    }
+
+    /* Loading progressif des images */
+    img {
+        opacity: 0;
+        transition: opacity 0.8s ease;
+    }
+
+    img.loaded {
+        opacity: 1;
+    }
+
+    /* Responsive Design Harmonieux */
+    @media (max-width: 768px) {
+        .section-title h2 {
+            font-size: 2.4rem;
+        }
+
+        .about-image {
+            transform: none;
+            margin-bottom: 3rem;
+        }
+
+        .experience-badge {
+            position: relative;
+            bottom: auto;
+            right: auto;
+            margin: 2rem auto;
+            animation: none;
+        }
+
+        .department-card:hover,
+        .service-card:hover,
+        .feature-card:hover {
+            transform: translateY(-5px) scale(1.01);
+        }
+    }
+
+    @media (max-width: 576px) {
+        .section-title h2 {
+            font-size: 2rem;
+        }
+
+        .section-title p {
+            font-size: 1.1rem;
+        }
+
+        .btn-primary,
+        .btn-outline {
+            padding: 1rem 2rem;
+            width: 100%;
+            max-width: 300px;
+            margin: 0.5rem 0;
+        }
+    }
+
+    /* Scrollbar personnalisée */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--bg-light);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--gradient-primary);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary-color);
+    }
+
+    /* Sélection de texte harmonisée */
+    ::selection {
+        background: rgba(102, 126, 234, 0.2);
+        color: var(--text-primary);
+    }
+
+    /* Focus states accessibles */
+    button:focus,
+    a:focus {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialisation AOS avec paramètres fluides
+        AOS.init({
+            duration: 1200,
+            once: true,
+            offset: 100,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            mirror: false,
+            disable: window.innerWidth < 768
+        });
+
+        // Chargement progressif des images avec effet de fade
+        const images = document.querySelectorAll('img');
+        images.forEach(img => {
+            if (img.complete) {
+                img.classList.add('loaded');
+            } else {
+                img.addEventListener('load', function () {
+                    this.classList.add('loaded');
+                });
+                img.addEventListener('error', function () {
+                    this.style.opacity = '1';
+                });
+            }
+        });
+
+        // Effets de hover avancés avec fluidité
+        const createSmoothHover = (element, options = {}) => {
+            const {
+                scale = 1.03,
+                translateY = -8,
+                shadow = 'var(--shadow-medium)',
+                duration = 500
+            } = options;
+
+            element.addEventListener('mouseenter', function (e) {
+                this.style.transform = `translateY(${translateY}px) scale(${scale})`;
+                this.style.boxShadow = shadow;
+                this.style.transition = `all ${duration}ms cubic-bezier(0.23, 1, 0.32, 1)`;
+            });
+
+            element.addEventListener('mouseleave', function (e) {
+                this.style.transform = 'translateY(0) scale(1)';
+                this.style.boxShadow = 'var(--shadow-soft)';
+                this.style.transition = `all ${duration}ms cubic-bezier(0.23, 1, 0.32, 1)`;
+            });
+        };
+
+        // Application des effets hover harmonieux
+        const interactiveElements = document.querySelectorAll(`
+            .department-card, 
+            .service-card, 
+            .feature-card, 
+            .doctor-card,
+            .feature-item,
+            .contact-item,
+            .btn-primary,
+            .btn-outline
+        `);
+
+        interactiveElements.forEach(element => {
+            createSmoothHover(element, {
+                scale: 1.02,
+                translateY: -6,
+                shadow: 'var(--shadow-medium)',
+                duration: 400
+            });
+        });
+
+        // Animation des icônes au hover
+        const icons = document.querySelectorAll('.icon, .service-icon, .department-icon');
+        icons.forEach(icon => {
+            icon.addEventListener('mouseenter', function () {
+                this.style.transform = 'scale(1.1) rotate(5deg)';
+            });
+
+            icon.addEventListener('mouseleave', function () {
+                this.style.transform = 'scale(1) rotate(0)';
+            });
+        });
+
+        // Effet de parallax doux et harmonieux
+        let ticking = false;
+        window.addEventListener('scroll', function () {
+            if (!ticking) {
+                requestAnimationFrame(function () {
+                    const scrolled = window.pageYOffset;
+                    const parallaxElements = document.querySelectorAll('.about-image, .vaccination-image');
+
+                    parallaxElements.forEach((element, index) => {
+                        const speed = 0.2 + (index * 0.1);
+                        const yPos = -(scrolled * speed);
+                        element.style.transform = `translateY(${yPos}px) rotateY(${index === 0 ? -5 : 5}deg)`;
+                    });
+
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Smooth scroll amélioré avec offset
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const offset = 80;
+                    const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
+
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Animation des liens CTA
+        const animatedLinks = document.querySelectorAll('.btn-learn-more, .service-btn, .feature-link');
+        animatedLinks.forEach(link => {
+            link.addEventListener('mouseenter', function () {
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.style.transform = 'translateX(6px)';
+                    icon.style.transition = 'transform 0.3s cubic-bezier(0.23, 1, 0.32, 1)';
+                }
+            });
+
+            link.addEventListener('mouseleave', function () {
+                const icon = this.querySelector('i');
+                if (icon) {
+                    icon.style.transform = 'translateX(0)';
+                }
+            });
+        });
+
+        // Effet de pulse subtil sur les boutons principaux
+        const primaryButtons = document.querySelectorAll('.btn-primary');
+        primaryButtons.forEach(btn => {
+            setInterval(() => {
+                btn.style.boxShadow = '0 15px 35px rgba(102, 126, 234, 0.4)';
+                setTimeout(() => {
+                    btn.style.boxShadow = 'var(--shadow-soft)';
+                }, 1500);
+            }, 5000);
+        });
+
+        // Gestion du responsive pour les animations
+        function handleResize() {
+            if (window.innerWidth < 768) {
+                AOS.refresh();
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+
+        // Préchargement des images critiques
+        const criticalImages = [
+            '{% static "assets/img/health/woman-imgco.png" %}',
+            '{% static "assets/img/health/pregnancy-care.jpg" %}'
+        ];
+
+        criticalImages.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
+
+        // Amélioration des performances
+        let lastScrollY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+
+            // Désactiver les animations lors du scroll rapide
+            if (Math.abs(currentScrollY - lastScrollY) > 100) {
+                document.body.classList.add('fast-scroll');
+            } else {
+                document.body.classList.remove('fast-scroll');
+            }
+
+            lastScrollY = currentScrollY;
+        }, { passive: true });
+    });
+
+    // Classe pour le scroll rapide
+    document.head.insertAdjacentHTML('beforeend', `
+        <style>
+            body.fast-scroll * {
+                transition-duration: 0s !important;
+                animation-duration: 0s !important;
+            }
+        </style>
+    `);
+</script>
+{% endblock %}

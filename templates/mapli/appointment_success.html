@@ -1,0 +1,848 @@
+{% extends 'mapli/base.html' %}
+{% load static %}
+
+{% block title %}Rendez-vous Confirmé - MaPli{% endblock %}
+
+{% block content %}
+<!-- Page Title -->
+<section class="page-title">
+    <div class="container">
+        <div class="breadcrumbs">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="bi bi-house"></i> Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'appoint' %}">Rendez-vous</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Confirmation</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="title-wrapper">
+            <h1>Rendez-vous Confirmé</h1>
+            <p>Votre rendez-vous a été programmé avec succès</p>
+        </div>
+    </div>
+</section>
+
+<!-- Success Section -->
+<section class="section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Carte de succès principale -->
+                <div class="success-card border-0 shadow-lg hover-lift">
+                    <div class="card-body text-center p-5">
+                        <!-- Icône de succès -->
+                        <div class="success-icon mb-4">
+                            <div class="icon-wrapper mx-auto"
+                                style="width: 100px; height: 100px; background: linear-gradient(135deg, #28a745, #20c997);">
+                                <i class="bi bi-check-circle-fill text-white" style="font-size: 3.5rem;"></i>
+                            </div>
+                        </div>
+
+                        <h2 class="card-title mb-3">Rendez-vous Confirmé !</h2>
+                        <p class="card-text lead mb-4 text-muted">
+                            Votre demande de rendez-vous pour une échographie a été enregistrée avec succès.
+                        </p>
+
+                        <!-- Numéro de confirmation -->
+                        <div class="confirmation-number mb-4 p-4 rounded">
+                            <div class="icon-wrapper mx-auto mb-3"
+                                style="width: 60px; height: 60px; background-color: color-mix(in srgb, var(--accent-color), transparent 90%);">
+                                <i class="bi bi-receipt text-primary" style="font-size: 1.8rem;"></i>
+                            </div>
+                            <h6 class="text-uppercase text-muted mb-2">Numéro de Confirmation</h6>
+                            <code class="fs-3 fw-bold text-primary">{{ appointment.registration_number }}</code>
+                        </div>
+
+                        <!-- Résumé du rendez-vous -->
+                        <div class="appointment-summary mb-5">
+                            <div class="row g-4">
+                                <!-- Informations Patient -->
+                                <div class="col-md-6">
+                                    <div class="info-section p-4 rounded h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="icon-wrapper me-3">
+                                                <i class="bi bi-person-fill text-primary"></i>
+                                            </div>
+                                            <h5 class="mb-0">Informations Patient</h5>
+                                        </div>
+                                        <div class="info-list">
+                                            <div class="info-item d-flex justify-content-between py-2 border-bottom">
+                                                <span class="text-muted">Nom complet</span>
+                                                <strong>{{ appointment.patient_name }}</strong>
+                                            </div>
+                                            <div class="info-item d-flex justify-content-between py-2 border-bottom">
+                                                <span class="text-muted">Email</span>
+                                                <strong>{{ appointment.patient_email }}</strong>
+                                            </div>
+                                            <div class="info-item d-flex justify-content-between py-2">
+                                                <span class="text-muted">Téléphone</span>
+                                                <strong>{{ appointment.patient_phone }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Détails Rendez-vous -->
+                                <div class="col-md-6">
+                                    <div class="info-section p-4 rounded h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="icon-wrapper me-3">
+                                                <i class="bi bi-calendar-event text-primary"></i>
+                                            </div>
+                                            <h5 class="mb-0">Détails Rendez-vous</h5>
+                                        </div>
+                                        <div class="info-list">
+                                            <div class="info-item d-flex justify-content-between py-2 border-bottom">
+                                                <span class="text-muted">Date</span>
+                                                <strong>{{ appointment.appointment_date|date:"d/m/Y" }}</strong>
+                                            </div>
+                                            <div class="info-item d-flex justify-content-between py-2 border-bottom">
+                                                <span class="text-muted">Hôpital</span>
+                                                <strong>{{ appointment.hospital.name }}</strong>
+                                            </div>
+                                            <div class="info-item d-flex justify-content-between py-2 border-bottom">
+                                                <span class="text-muted">Médecin</span>
+                                                <strong>Dr. {{ appointment.doctor.name }}</strong>
+                                            </div>
+                                            <div class="info-item d-flex justify-content-between py-2 border-bottom">
+                                                <span class="text-muted">Position</span>
+                                                <strong>{{ appointment.daily_sequence }}</strong>
+                                            </div>
+                                            <div class="info-item d-flex justify-content-between py-2">
+                                                <span class="text-muted">Prix</span>
+                                                <strong class="text-success">{{ appointment.get_formatted_price }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="action-buttons mb-4">
+                            <div class="row g-3 justify-content-center">
+                                <div class="col-auto">
+                                    <a href="{% url 'download_receipt' appointment.id %}"
+                                        class="btn btn-primary btn-lg">
+                                        <i class="bi bi-download me-2"></i>Télécharger le Reçu PDF
+                                    </a>
+                                </div>
+                                <div class="col-auto">
+                                    <a href="{% url 'home' %}" class="btn btn-outline btn-lg">
+                                        <i class="bi bi-house me-2"></i>Retour à l'Accueil
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instructions importantes -->
+                        <div class="instructions mt-4 p-4 rounded">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="icon-wrapper me-3">
+                                    <i class="bi bi-info-circle text-warning"></i>
+                                </div>
+                                <h5 class="mb-0">Instructions Importantes</h5>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-check-circle text-success me-2 mt-1"></i>
+                                        <span>Présentez votre reçu PDF à l'accueil de l'hôpital</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-clock text-success me-2 mt-1"></i>
+                                        <span>Arrivez 15 minutes avant l'heure de consultation</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-currency-dollar text-success me-2 mt-1"></i>
+                                        <span>Paiement de {{ appointment.get_formatted_price }} sur place</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-person-badge text-success me-2 mt-1"></i>
+                                        <span>Apportez votre carte d'identité</span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-envelope text-success me-2 mt-1"></i>
+                                        <span>Votre reçu a également été envoyé à <strong>{{ appointment.patient_email }}</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    /* ===== DESIGN PREMIUM POUR PAGE CONFIRMATION ===== */
+
+    /* Variables de couleurs raffinées */
+    :root {
+        --primary-color: #667EEA;
+        --secondary-color: #764BA2;
+        --accent-color: #FF6B6B;
+        --success-color: #10B981;
+        --warning-color: #F59E0B;
+        --info-color: #3B82F6;
+        --danger-color: #EF4444;
+        --text-primary: #1F2937;
+        --text-secondary: #6B7280;
+        --text-light: #9CA3AF;
+        --bg-light: #F8FAFC;
+        --bg-white: #FFFFFF;
+        --border-color: #E5E7EB;
+
+        /* Nouvelles variables design */
+        --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, #FF8E53 100%);
+        --gradient-success: linear-gradient(135deg, var(--success-color) 0%, #34D399 100%);
+        --gradient-warning: linear-gradient(135deg, var(--warning-color) 0%, #F59E0B 100%);
+        --gradient-info: linear-gradient(135deg, var(--info-color) 0%, #60A5FA 100%);
+        --gradient-light: linear-gradient(135deg, #F8FAFC 0%, #FFFFFF 100%);
+
+        /* Ombres sophistiquées */
+        --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.12);
+        --shadow-large: 0 20px 50px rgba(0, 0, 0, 0.15);
+        --shadow-hover: 0 25px 60px rgba(0, 0, 0, 0.18);
+
+        /* Bordures élégantes */
+        --border-radius-sm: 12px;
+        --border-radius-md: 20px;
+        --border-radius-lg: 28px;
+        --border-gentle: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* Page Title - Design Premium */
+    .page-title {
+        background: var(--gradient-light);
+        padding: 100px 0 60px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-title::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.03) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .breadcrumbs {
+        margin-bottom: 2rem;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+
+    .breadcrumb-item a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color 0.3s ease;
+        font-weight: 400;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary-color);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--primary-color);
+        font-weight: 500;
+    }
+
+    .title-wrapper h1 {
+        font-size: 3.2rem;
+        font-weight: 300;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        letter-spacing: -1px;
+        line-height: 1.1;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .title-wrapper p {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-weight: 350;
+        max-width: 600px;
+    }
+
+    /* Success Section - Design Élégant */
+    .section {
+        padding: 80px 0;
+        background: var(--bg-white);
+        position: relative;
+    }
+
+    /* Success Card - Design Premium */
+    .success-card {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%) !important;
+        border-radius: var(--border-radius-lg) !important;
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(20px);
+        box-shadow: var(--shadow-large) !important;
+        transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .success-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.7s;
+    }
+
+    .success-card:hover::before {
+        left: 100%;
+    }
+
+    .success-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        box-shadow: var(--shadow-hover) !important;
+    }
+
+    .card-body {
+        padding: 4rem 3rem !important;
+    }
+
+    /* Success Icon - Design Animé */
+    .success-icon {
+        position: relative;
+    }
+
+    .icon-wrapper {
+        border-radius: 50% !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 15px 35px rgba(40, 167, 69, 0.4);
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .icon-wrapper::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transform: rotate(45deg);
+        transition: all 0.6s ease;
+    }
+
+    .icon-wrapper:hover::before {
+        transform: rotate(45deg) translate(50%, 50%);
+    }
+
+    .icon-wrapper:hover {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 20px 50px rgba(40, 167, 69, 0.6);
+    }
+
+    .success-icon .icon-wrapper {
+        background: var(--gradient-success) !important;
+        width: 120px !important;
+        height: 120px !important;
+    }
+
+    .success-icon i {
+        font-size: 4rem !important;
+        color: white !important;
+        z-index: 2;
+        position: relative;
+    }
+
+    /* Card Content - Design Raffiné */
+    .card-title {
+        font-size: 2.5rem;
+        font-weight: 300;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        letter-spacing: -0.5px;
+        background: var(--gradient-success);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .card-text.lead {
+        font-size: 1.3rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        font-weight: 350;
+        max-width: 600px;
+        margin: 0 auto 3rem;
+    }
+
+    /* Confirmation Number - Design Élégant */
+    .confirmation-number {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.04) 100%) !important;
+        border: 2px solid rgba(102, 126, 234, 0.2) !important;
+        border-radius: var(--border-radius-md);
+        padding: 2.5rem 2rem;
+        margin-bottom: 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .confirmation-number::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s;
+    }
+
+    .confirmation-number:hover::before {
+        left: 100%;
+    }
+
+    .confirmation-number .icon-wrapper {
+        width: 70px !important;
+        height: 70px !important;
+        background: rgba(102, 126, 234, 0.1) !important;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        margin-bottom: 1.5rem;
+    }
+
+    .confirmation-number .icon-wrapper i {
+        font-size: 2rem !important;
+        color: var(--primary-color) !important;
+    }
+
+    .confirmation-number h6 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        color: var(--text-secondary);
+        margin-bottom: 1rem;
+    }
+
+    .confirmation-number code {
+        font-size: 2.5rem !important;
+        font-weight: 700;
+        color: var(--primary-color);
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 2px;
+    }
+
+    /* Appointment Summary - Design Moderne */
+    .appointment-summary {
+        margin-bottom: 3rem;
+    }
+
+    .info-section {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(248, 250, 252, 0.5) 100%) !important;
+        border-radius: var(--border-radius-md);
+        border: 1px solid rgba(255, 255, 255, 0.8) !important;
+        backdrop-filter: blur(15px);
+        box-shadow: var(--shadow-soft);
+        transition: all 0.4s ease;
+        height: 100%;
+    }
+
+    .info-section:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-medium);
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .info-section .d-flex {
+        margin-bottom: 1.5rem;
+    }
+
+    .info-section .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: var(--border-radius-sm);
+        flex-shrink: 0;
+    }
+
+    .info-section .icon-wrapper i {
+        font-size: 1.3rem;
+        color: var(--primary-color);
+    }
+
+    .info-section h5 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .info-list .info-item {
+        border-bottom: 1px solid rgba(102, 126, 234, 0.1) !important;
+        transition: all 0.3s ease;
+    }
+
+    .info-list .info-item:hover {
+        background: rgba(102, 126, 234, 0.03);
+        border-radius: var(--border-radius-sm);
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .info-list .info-item:last-child {
+        border-bottom: none !important;
+    }
+
+    .info-list .info-item span {
+        font-weight: 400;
+        color: var(--text-secondary);
+    }
+
+    .info-list .info-item strong {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .text-success {
+        color: var(--success-color) !important;
+        font-weight: 700;
+    }
+
+    /* Action Buttons - Design Premium */
+    .action-buttons {
+        margin-bottom: 3rem;
+    }
+
+    .btn {
+        padding: 1rem 2.5rem !important;
+        border-radius: var(--border-radius-sm) !important;
+        font-weight: 500 !important;
+        text-decoration: none;
+        transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        font-size: 1.1rem;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-lg {
+        padding: 1.25rem 3rem !important;
+        font-size: 1.2rem;
+    }
+
+    .btn-primary {
+        background: var(--gradient-primary) !important;
+        color: white !important;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: var(--shadow-medium);
+    }
+
+    .btn-outline {
+        background: transparent !important;
+        border: 2px solid var(--primary-color) !important;
+        color: var(--primary-color) !important;
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-outline:hover {
+        background: var(--gradient-primary) !important;
+        color: white !important;
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-soft);
+    }
+
+    /* Instructions - Design Attractif */
+    .instructions {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.04) 100%) !important;
+        border: 1px solid rgba(245, 158, 11, 0.2) !important;
+        border-radius: var(--border-radius-md);
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .instructions::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.6s;
+    }
+
+    .instructions:hover::before {
+        left: 100%;
+    }
+
+    .instructions .d-flex {
+        margin-bottom: 1.5rem;
+    }
+
+    .instructions .icon-wrapper {
+        width: 50px;
+        height: 50px;
+        background: rgba(245, 158, 11, 0.1);
+        border-radius: var(--border-radius-sm);
+        flex-shrink: 0;
+    }
+
+    .instructions .icon-wrapper i {
+        font-size: 1.3rem;
+        color: var(--warning-color);
+    }
+
+    .instructions h5 {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .instructions .d-flex.align-items-start {
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        border-radius: var(--border-radius-sm);
+        transition: all 0.3s ease;
+    }
+
+    .instructions .d-flex.align-items-start:hover {
+        background: rgba(255, 255, 255, 0.5);
+        transform: translateX(5px);
+    }
+
+    .instructions .d-flex.align-items-start i {
+        font-size: 1.1rem;
+        margin-top: 0.125rem;
+        flex-shrink: 0;
+    }
+
+    .instructions .d-flex.align-items-start span {
+        color: var(--text-secondary);
+        line-height: 1.5;
+        font-weight: 350;
+    }
+
+    .instructions .d-flex.align-items-start strong {
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    /* Animations d'entrée */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .success-card {
+        animation: fadeInUp 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .confirmation-number {
+        animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.2s both;
+    }
+
+    .appointment-summary {
+        animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.4s both;
+    }
+
+    .action-buttons {
+        animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.6s both;
+    }
+
+    .instructions {
+        animation: fadeInUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.8s both;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .page-title {
+            padding: 80px 0 40px;
+        }
+
+        .title-wrapper h1 {
+            font-size: 2.4rem;
+        }
+
+        .card-body {
+            padding: 3rem 2rem !important;
+        }
+
+        .success-icon .icon-wrapper {
+            width: 100px !important;
+            height: 100px !important;
+        }
+
+        .success-icon i {
+            font-size: 3.5rem !important;
+        }
+
+        .card-title {
+            font-size: 2rem;
+        }
+
+        .card-text.lead {
+            font-size: 1.1rem;
+        }
+
+        .confirmation-number code {
+            font-size: 2rem !important;
+        }
+
+        .confirmation-number .icon-wrapper {
+            width: 60px !important;
+            height: 60px !important;
+        }
+
+        .btn-lg {
+            padding: 1rem 2rem !important;
+            font-size: 1.1rem;
+        }
+
+        .instructions {
+            padding: 2rem 1.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .title-wrapper h1 {
+            font-size: 2rem;
+        }
+
+        .title-wrapper p {
+            font-size: 1.1rem;
+        }
+
+        .card-body {
+            padding: 2.5rem 1.5rem !important;
+        }
+
+        .success-icon .icon-wrapper {
+            width: 80px !important;
+            height: 80px !important;
+        }
+
+        .success-icon i {
+            font-size: 3rem !important;
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+        }
+
+        .confirmation-number code {
+            font-size: 1.5rem !important;
+        }
+
+        .btn {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .action-buttons .row {
+            flex-direction: column;
+        }
+
+        .action-buttons .col-auto {
+            width: 100%;
+        }
+    }
+
+    /* États de focus améliorés */
+    .btn:focus,
+    .info-section:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    /* Scrollbar personnalisée */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--bg-light);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--gradient-primary);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--secondary-color);
+    }
+
+    /* Sélection de texte harmonisée */
+    ::selection {
+        background: rgba(102, 126, 234, 0.2);
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,320 @@
+<!-- templates/mapli/admin/user_detail.html -->
+{% extends 'mapli/adabas.html' %}
+{% load static %}
+
+{% block title %}Détail utilisateur - {{ user_detail.username }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Fil d'Ariane -->
+    <div class="mb-4">
+        <a href="{% url 'admin_users_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Colonne gauche - Informations principales -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <!-- Avatar -->
+                    <div class="mb-4">
+                        <div class="mx-auto bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 120px; height: 120px;">
+                            <i class="bi bi-person-circle fs-1 text-primary"></i>
+                        </div>
+                    </div>
+
+                    <!-- Nom et rôle -->
+                    <h4 class="mb-1">{{ user_detail.first_name }} {{ user_detail.last_name }}</h4>
+                    <p class="text-muted mb-2">@{{ user_detail.username }}</p>
+
+                    <!-- Badges de statut -->
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        <span class="badge 
+                            {% if user_detail.role == 'admin_systeme' %}bg-danger
+                            {% elif user_detail.role == 'hopital' %}bg-success
+                            {% elif user_detail.role == 'medecin' %}bg-warning
+                            {% else %}bg-primary{% endif %}">
+                            {% if user_detail.role == 'admin_systeme' %}Administrateur
+                            {% elif user_detail.role == 'hopital' %}Hôpital
+                            {% elif user_detail.role == 'medecin' %}Médecin
+                            {% else %}Patient{% endif %}
+                        </span>
+
+                        {% if user_detail.is_active %}
+                        <span class="badge bg-success">Actif</span>
+                        {% else %}
+                        <span class="badge bg-danger">Inactif</span>
+                        {% endif %}
+
+                        {% if user_detail.is_superuser %}
+                        <span class="badge bg-info">Superuser</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-warning" onclick="toggleUser({{ user_detail.id }})">
+                            <i class="bi bi-toggle-on me-2"></i>
+                            {% if user_detail.is_active %}Désactiver{% else %}Activer{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations de contact -->
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-envelope me-2"></i>
+                        Contact
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <th style="width: 100px;">Email:</th>
+                            <td>
+                                <a href="mailto:{{ user_detail.email }}">{{ user_detail.email }}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Téléphone:</th>
+                            <td>{{ user_detail.phone_number|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite - Informations détaillées -->
+        <div class="col-md-8">
+            <!-- Informations personnelles -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person me-2"></i>
+                        Informations personnelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th style="width: 150px;">Nom complet:</th>
+                            <td>{{ user_detail.first_name }} {{ user_detail.last_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date de naissance:</th>
+                            <td>{{ user_detail.date_of_birth|date:"d/m/Y"|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Pays:</th>
+                            <td>{{ user_detail.country }}</td>
+                        </tr>
+                        <tr>
+                            <th>Province:</th>
+                            <td>{{ user_detail.province|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Commune:</th>
+                            <td>{{ user_detail.commune|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Quartier:</th>
+                            <td>{{ user_detail.district|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Profession:</th>
+                            <td>{{ user_detail.job_title|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Informations du compte -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-lock me-2"></i>
+                        Informations du compte
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th style="width: 150px;">Nom d'utilisateur:</th>
+                            <td>{{ user_detail.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Rôle:</th>
+                            <td>
+                                <span class="badge 
+                                    {% if user_detail.role == 'admin_systeme' %}bg-danger
+                                    {% elif user_detail.role == 'hopital' %}bg-success
+                                    {% elif user_detail.role == 'medecin' %}bg-warning
+                                    {% else %}bg-primary{% endif %}">
+                                    {{ user_detail.get_role_display_name }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Date d'inscription:</th>
+                            <td>{{ user_detail.date_joined|date:"d/m/Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Dernière connexion:</th>
+                            <td>{{ user_detail.last_login|date:"d/m/Y H:i"|default:"Jamais" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Statut:</th>
+                            <td>
+                                {% if user_detail.is_active %}
+                                <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Superuser:</th>
+                            <td>
+                                {% if user_detail.is_superuser %}
+                                <span class="badge bg-info">Oui</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Non</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Staff:</th>
+                            <td>
+                                {% if user_detail.is_staff %}
+                                <span class="badge bg-info">Oui</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Non</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Informations de grossesse (si patient) -->
+            {% if user_detail.role == 'patient' and user_detail.is_pregnant %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-heart-pulse me-2"></i>
+                        Informations grossesse
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tr>
+                            <th style="width: 150px;">Enceinte:</th>
+                            <td>
+                                <span class="badge bg-success">Oui</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Semaine de grossesse:</th>
+                            <td>{{ user_detail.current_pregnancy_week }} SA</td>
+                        </tr>
+                        <tr>
+                            <th>Date dernières règles:</th>
+                            <td>{{ user_detail.last_menstrual_period|date:"d/m/Y"|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Groupe sanguin:</th>
+                            <td>{{ user_detail.blood_type|default:"-" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Allergies:</th>
+                            <td>{{ user_detail.allergies|default:"Aucune"|linebreaks }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Derniers rendez-vous -->
+            {% if appointments %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Derniers rendez-vous
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Médecin</th>
+                                    <th>Hôpital</th>
+                                    <th>Statut</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for apt in appointments %}
+                                <tr>
+                                    <td>{{ apt.scheduled_date|date:"d/m/Y H:i" }}</td>
+                                    <td>Dr. {{ apt.doctor.name }}</td>
+                                    <td>{{ apt.hospital.name }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if apt.status == 'CO' %}bg-success
+                                            {% elif apt.status == 'PE' %}bg-warning
+                                            {% elif apt.status == 'CA' %}bg-danger
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ apt.get_status_display }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleUser(userId) {
+        if (confirm('{% if user_detail.is_active %}Désactiver{% else %}Activer{% endif %} cet utilisateur ?')) {
+            fetch(`/gestion/users/${userId}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('Erreur lors de l\'opération');
+                }
+            }).catch(error => {
+                alert('Erreur de connexion');
+            });
+        }
+    }
+</script>
+
+<style>
+    .table th {
+        font-weight: 500;
+        color: #6B7280;
+    }
+
+    .badge {
+        padding: 0.5em 0.8em;
+    }
+</style>
+{% endblock %}

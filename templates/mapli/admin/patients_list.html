@@ -1,0 +1,205 @@
+<!-- templates/mapli/admin/patients_list.html -->
+{% extends 'mapli/adabas.html' %}
+{% load static %}
+
+{% block title %}Gestion des patients - MaPli{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0">
+            <i class="bi bi-people-fill me-2"></i>
+            Gestion des patients
+        </h1>
+        <div>
+            <span class="text-muted me-3">Total: {{ patients|length }} patients</span>
+        </div>
+    </div>
+
+    <!-- Liste des patients -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Patient</th>
+                            <th>Contact</th>
+                            <th>Grossesse</th>
+                            <th>Fonctionnalités</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                        <tr>
+                            <td><span class="badge bg-secondary">#{{ patient.id }}</span></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-circle fs-3 me-3"></i>
+                                    <div>
+                                        <strong>{{ patient.first_name }} {{ patient.last_name }}</strong><br>
+                                        <small class="text-muted">@{{ patient.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <i class="bi bi-envelope me-1"></i> {{ patient.email }}<br>
+                                <small><i class="bi bi-telephone me-1"></i> {{ patient.phone_number|default:"-" }}</small>
+                            </td>
+                            <td>
+                                {% if patient.is_pregnant %}
+                                <span class="badge bg-success">Enceinte</span>
+                                <small class="d-block">Semaine {{ patient.current_pregnancy_week }}</small>
+                                {% else %}
+                                <span class="badge bg-secondary">Non enceinte</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% with count=patient.authorized_features.count %}
+                                {% if count > 0 %}
+                                <span class="badge bg-info">{{ count }} fonctionnalité(s)</span>
+                                {% else %}
+                                <span class="badge bg-warning">Aucune</span>
+                                {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td>
+                                {% if patient.is_active %}
+                                <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary" onclick="viewPatient({{ patient.id }})"
+                                        title="Voir détails">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-warning" onclick="togglePatient({{ patient.id }})"
+                                        title="Activer/Désactiver">
+                                        <i class="bi bi-toggle-on"></i>
+                                    </button>
+                                    <button class="btn btn-outline-info" onclick="manageFeatures({{ patient.id }})"
+                                        title="Gérer fonctionnalités">
+                                        <i class="bi bi-gear"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <i class="bi bi-people fs-1 text-muted d-block mb-3"></i>
+                                <p class="text-muted">Aucun patient enregistré</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gestion des fonctionnalités -->
+<div class="modal fade" id="featureModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-gear me-2"></i>
+                    Gérer les fonctionnalités du patient
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" action="{% url 'admin_patients_list' %}" id="featureForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p class="mb-3">
+                        Patient: <strong id="modalPatientName"></strong>
+                    </p>
+                    <input type="hidden" name="patient_id" id="modalPatientId">
+                    <div class="mb-3">
+                        <label class="form-label">Fonctionnalités disponibles</label>
+                        <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                            {% for feature in features %}
+                            <div class="form-check">
+                                <input class="form-check-input feature-checkbox" type="checkbox" name="features"
+                                    value="{{ feature.id }}" id="feature_{{ feature.id }}">
+                                <label class="form-check-label" for="feature_{{ feature.id }}">
+                                    <strong>{{ feature.nom }}</strong>
+                                    <small class="d-block text-muted">{{ feature.description|truncatechars:50 }}</small>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-2"></i>Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function viewPatient(patientId) {
+        window.location.href = `/gestion/patients/${patientId}/`;
+    }
+
+    function togglePatient(patientId) {
+        if (confirm('Activer/Désactiver ce patient ?')) {
+            fetch(`/gestion/patients/${patientId}/toggle/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            }).then(response => {
+                if (response.ok) location.reload();
+                else alert('Erreur lors de l\'opération');
+            });
+        }
+    }
+
+    function manageFeatures(patientId) {
+        window.location.href = `/gestion/patients/${patientId}/features/`;
+    }
+
+    function openFeatureModal(patientId, patientName, patientFeatures) {
+        document.getElementById('modalPatientId').value = patientId;
+        document.getElementById('modalPatientName').textContent = patientName;
+
+        document.querySelectorAll('.feature-checkbox').forEach(cb => {
+            cb.checked = false;
+        });
+
+        if (patientFeatures) {
+            patientFeatures.forEach(featureId => {
+                document.getElementById('feature_' + featureId).checked = true;
+            });
+        }
+
+        new bootstrap.Modal(document.getElementById('featureModal')).show();
+    }
+</script>
+
+<style>
+    .table th {
+        font-weight: 600;
+        color: #4B5563;
+    }
+
+    .btn-group .btn {
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+{% endblock %}

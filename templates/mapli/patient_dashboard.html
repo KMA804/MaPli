@@ -1,0 +1,34 @@
+<!-- Dans patient_dashboard.html -->
+{% load mapli_translate %}
+
+<div class="container">
+    <!-- Message de bienvenue traduit -->
+    <h1>{{ welcome_message }}</h1>
+
+    <!-- Hôpitaux avec noms traduits -->
+    <h2>{% translate "Hôpitaux recommandés" %}</h2>
+    <div class="hospitals">
+        {% for hospital in hospitals %}
+        <div class="hospital-card">
+            <h3>{{ hospital.name }}</h3>
+            <p>{{ hospital.services }}</p>
+            <!-- Accès à l'original si besoin -->
+            <small>📞 {{ hospital.original.phone_number }}</small>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Rendez-vous avec statuts traduits -->
+    <h2>{% translate "Mes rendez-vous" %}</h2>
+    <div class="appointments">
+        {% for appointment in appointments %}
+        <div class="appointment-card">
+            <h4>{{ appointment.doctor }}</h4>
+            <p>{% translate "Date" %}: {{ appointment.date|date:"d/m/Y H:i" }}</p>
+            <p>{% translate "Statut" %}: <span class="status-{{ appointment.original.status }}">{{ appointment.status
+                    }}</span></p>
+            <p>{% translate "Raison" %}: {{ appointment.reason }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>

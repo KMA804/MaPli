@@ -1,0 +1,20 @@
+<!-- templates/mapli/admin/patient_features.html -->
+{% extends 'mapli/adabas.html' %}
+{% load static %}
+
+{% block title %}Gestion des fonctionnalités - {{ patient.first_name }} {{ patient.last_name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="{% url 'admin_patients_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-2"></i>Retour à la liste des patients
+        </a>
+    </div>
+
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Page de gestion des fonctionnalités à créer.
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,2139 @@
+{% extends 'mapli/base.html' %}
+{% load static %}
+
+{% block title %}Prendre Rendez-vous - MaPli{% endblock %}
+
+{% block content %}
+<!-- Page Title -->
+<section class="page-title">
+    <div class="container">
+        <div class="breadcrumbs">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'home' %}"><i class="bi bi-house"></i> Accueil</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Rendez-vous</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="title-wrapper">
+            <h1>Rendez-vous Échographie</h1>
+            <p>Prenez rendez-vous en ligne pour votre échographie de grossesse. Réception instantanée du reçu PDF par
+                email.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Alert Messages -->
+<div class="container mt-4">
+    <div id="successAlert" class="alert alert-success" style="display: none;">
+        <div class="alert-content">
+            <i class="bi bi-check-circle-fill alert-icon"></i>
+            <div class="alert-text">
+                <strong class="alert-title">Succès!</strong>
+                <span class="alert-message">Votre rendez-vous a été pris avec succès. Un email avec le reçu PDF vous a
+                    été envoyé.</span>
+            </div>
+        </div>
+        <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+
+    <div id="errorAlert" class="alert alert-error" style="display: none;">
+        <div class="alert-content">
+            <i class="bi bi-exclamation-triangle-fill alert-icon"></i>
+            <div class="alert-text">
+                <strong class="alert-title">Erreur!</strong>
+                <span class="alert-message" id="errorMessage"></span>
+            </div>
+        </div>
+        <button type="button" class="alert-close" onclick="this.parentElement.style.display='none'">
+            <i class="bi bi-x"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Appointment Section -->
+<section class="appointment section">
+    <div class="container">
+        <div class="row gy-4">
+
+            <!-- Appointment Info -->
+            <div class="col-lg-6">
+                <div class="appointment-info">
+                    <h3>Rendez-vous Rapide & Facile</h3>
+                    <p class="mb-4">Prenez votre rendez-vous d'échographie en quelques étapes simples. Recevez
+                        immédiatement votre reçu PDF par email.</p>
+
+                    <div class="info-items">
+                        <div class="info-item d-flex align-items-center mb-4">
+                            <div class="icon-wrapper me-3">
+                                <i class="bi bi-calendar-check"></i>
+                            </div>
+                            <div>
+                                <h5>Planification Flexible</h5>
+                                <p class="mb-0">Choisissez parmi les créneaux disponibles qui conviennent à votre emploi
+                                    du temps</p>
+                            </div>
+                        </div>
+
+                        <div class="info-item d-flex align-items-center mb-4">
+                            <div class="icon-wrapper me-3">
+                                <i class="bi bi-envelope-check"></i>
+                            </div>
+                            <div>
+                                <h5>Reçu PDF Immédiat</h5>
+                                <p class="mb-0">Recevez votre reçu avec numéro d'inscription par email instantanément
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="info-item d-flex align-items-center mb-4">
+                            <div class="icon-wrapper me-3">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div>
+                                <h5>Soins Experts</h5>
+                                <p class="mb-0">Échographistes certifiés à votre service pour un suivi de grossesse
+                                    optimal</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="emergency-contact mt-4">
+                        <div class="emergency-card p-3">
+                            <h6 class="mb-2"><i class="bi bi-telephone-fill me-2"></i>Urgences Maternité</h6>
+                            <p class="mb-0">Appelez <strong>+257 67338851</strong> pour une assistance médicale urgente
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointment Form -->
+            <div class="col-lg-6">
+                <div class="appointment-form-wrapper">
+                    <form id="appointmentForm" class="appointment-form">
+                        {% csrf_token %}
+                        <div class="row gy-3">
+
+                            <!-- ÉTAPE 1: Sélection de l'hôpital -->
+                            <div class="col-12" id="step-hospital">
+                                <label class="form-label">Choisir l'hôpital</label>
+                                <select name="hospital" class="form-select" id="hospitalSelect" required>
+                                    <option value="">Sélectionnez un hôpital</option>
+                                    <!-- Les hôpitaux seront chargés dynamiquement -->
+                                </select>
+                                <div class="mt-3">
+                                    <button type="button" class="btn btn-primary" id="btnNextStep1">
+                                        Suivant <i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ÉTAPE 2: Informations patient (caché initialement) -->
+                            <div class="col-12 d-none" id="step-patient-info">
+                                <h5 class="mb-3">Informations du patient</h5>
+                                <div class="alert alert-info mb-3">
+                                    <i class="bi bi-info-circle-fill me-2"></i>
+                                    Vos informations personnelles sont protégées et non modifiables pour des raisons de
+                                    sécurité.
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <input type="text" name="patient_name" class="form-control"
+                                            placeholder="Nom complet" required readonly
+                                            style="background-color: #f8f9fa; cursor: not-allowed; opacity: 0.9;">
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <input type="email" name="patient_email" class="form-control"
+                                            placeholder="Votre Email" required readonly
+                                            style="background-color: #f8f9fa; cursor: not-allowed; opacity: 0.9;">
+                                    </div>
+
+                                    <div class="col-md-6 mt-3">
+                                        <input type="tel" name="patient_phone" class="form-control"
+                                            placeholder="Numéro de téléphone" required readonly
+                                            style="background-color: #f8f9fa; cursor: not-allowed; opacity: 0.9;">
+                                    </div>
+
+                                    <div class="col-md-6 mt-3">
+                                        <select name="ultrasound_type" class="form-select" required>
+                                            <option value="">Type d'échographie</option>
+                                            <option value="DATING">Écho de datation</option>
+                                            <option value="FIRST_TRIMESTER">1er trimestre</option>
+                                            <option value="SECOND_TRIMESTER">2ème trimestre (morphologique)</option>
+                                            <option value="THIRD_TRIMESTER">3ème trimestre</option>
+                                            <option value="SPECIALIZED">Écho spécialisée</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-3 d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline" id="btnPrevStep2">
+                                        <i class="bi bi-arrow-left me-2"></i>Précédent
+                                    </button>
+                                    <button type="button" class="btn btn-primary" id="btnNextStep2">
+                                        Suivant <i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ÉTAPE 3: Date et médecin (caché initialement) -->
+                            <div class="col-12 d-none" id="step-date-doctor">
+                                <h5 class="mb-3">Date et médecin</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="date-picker-wrapper" id="datePickerWrapper">
+                                            <input type="text" name="scheduled_date"
+                                                class="form-control flatpickr-input" id="appointmentDate"
+                                                placeholder="Sélectionnez une date" readonly="readonly" required>
+                                            <div class="calendar-preview">
+                                                <i class="bi bi-calendar3 calendar-icon"></i>
+                                                <span class="selected-date" id="selectedDateDisplay">Choisir une
+                                                    date</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label">Choisir le médecin</label>
+                                        <select name="doctor" class="form-select" id="doctorSelect" required>
+                                            <option value="">Sélectionnez un médecin</option>
+                                            <!-- Les médecins seront chargés dynamiquement -->
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-6 mt-3">
+                                        <div class="time-picker-wrapper" id="timePickerWrapper">
+                                            <input type="time" name="scheduled_time" class="form-control time-style"
+                                                id="appointmentTime" required>
+                                            <div class="clock-preview">
+                                                <i class="bi bi-clock clock-icon"></i>
+                                                <span class="selected-time" id="selectedTimeDisplay">Choisir une
+                                                    heure</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6 mt-3">
+                                        <input type="number" name="pregnancy_week" class="form-control"
+                                            placeholder="Semaine de grossesse" min="1" max="42">
+                                    </div>
+                                </div>
+
+                                <!-- Légende du calendrier -->
+                                <div class="calendar-legend mt-3">
+                                    <div class="legend-item">
+                                        <div class="legend-color available"></div>
+                                        <span>Disponible</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color booked"></div>
+                                        <span>Déjà réservé</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color future"></div>
+                                        <span>À venir (non disponible)</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color today"></div>
+                                        <span>Aujourd'hui</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <div class="legend-color weekend"></div>
+                                        <span>Week-end</span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-3 d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline" id="btnPrevStep3">
+                                        <i class="bi bi-arrow-left me-2"></i>Précédent
+                                    </button>
+                                    <button type="button" class="btn btn-primary" id="btnNextStep3">
+                                        Suivant <i class="bi bi-arrow-right ms-2"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ÉTAPE 4: Informations supplémentaires (caché initialement) -->
+                            <div class="col-12 d-none" id="step-additional-info">
+                                <h5 class="mb-3">Informations supplémentaires</h5>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <textarea class="form-control" name="reason" rows="4"
+                                            placeholder="Informations supplémentaires (antécédents, symptômes, etc.)"></textarea>
+                                    </div>
+
+                                    <div class="col-12 mt-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="consentCheck" required>
+                                            <label class="form-check-label" for="consentCheck">
+                                                J'accepte les conditions de traitement de mes données médicales
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 d-flex justify-content-between">
+                                    <button type="button" class="btn btn-outline" id="btnPrevStep4">
+                                        <i class="bi bi-arrow-left me-2"></i>Précédent
+                                    </button>
+                                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                                        <i class="bi bi-calendar-plus me-2"></i>Prendre Rendez-vous
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Indicateur de progression -->
+                            <div class="col-12 mt-4">
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar" id="formProgress" style="width: 25%;"></div>
+                                </div>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-muted">Hôpital</small>
+                                    <small class="text-muted">Informations</small>
+                                    <small class="text-muted">Date & Médecin</small>
+                                    <small class="text-muted">Finalisation</small>
+                                </div>
+                            </div>
+
+                            <!-- Spinner de chargement -->
+                            <div class="col-12">
+                                <div class="loading-spinner text-center mb-3" style="display: none;">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Chargement...</span>
+                                    </div>
+                                    <p class="mt-2">Traitement de votre demande...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Process Steps -->
+        <div class="process-steps mt-5">
+            <div class="row text-center gy-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="step-item">
+                        <div class="step-number">1</div>
+                        <div class="step-icon">
+                            <i class="bi bi-hospital"></i>
+                        </div>
+                        <h5>Choisir l'hôpital</h5>
+                        <p>Sélectionnez l'hôpital où vous souhaitez votre échographie</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="step-item">
+                        <div class="step-number">2</div>
+                        <div class="step-icon">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                        <h5>Remplir les informations</h5>
+                        <p>Fournissez vos coordonnées et le type d'échographie souhaité</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="step-item">
+                        <div class="step-number">3</div>
+                        <div class="step-icon">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                        <h5>Choisir la date</h5>
+                        <p>Sélectionnez la date et l'heure qui vous conviennent</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6">
+                    <div class="step-item">
+                        <div class="step-number">4</div>
+                        <div class="step-icon">
+                            <i class="bi bi-envelope-check"></i>
+                        </div>
+                        <h5>Reçu PDF par email</h5>
+                        <p>Recevez instantanément votre reçu avec numéro d'inscription</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+
+<style>
+    /* ===== DESIGN PREMIUM POUR PAGE RENDEZ-VOUS ===== */
+
+    /* Variables de couleurs - Thème Médical MaPli */
+    :root {
+        /* Couleurs principales */
+        --primary: #4361ee;
+        --primary-light: #4895ef;
+        --primary-dark: #3f37c9;
+        --secondary: #4cc9f0;
+        --accent: #f72585;
+        --success: #06d6a0;
+        --warning: #ffb703;
+        --error: #ef476f;
+
+        /* Couleurs neutres */
+        --text-primary: #2b2d42;
+        --text-secondary: #6c757d;
+        --text-muted: #adb5bd;
+        --bg-light: #f8f9fa;
+        --bg-white: #ffffff;
+        --border-color: #e9ecef;
+
+        /* Dégradés */
+        --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        --gradient-accent: linear-gradient(135deg, var(--accent) 0%, #b5179e 100%);
+        --gradient-success: linear-gradient(135deg, var(--success) 0%, #06d6a0 100%);
+        --gradient-warning: linear-gradient(135deg, var(--warning) 0%, #fb8b24 100%);
+
+        /* Ombres */
+        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+        --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+        --shadow-hover: 0 20px 50px rgba(67, 97, 238, 0.15);
+
+        /* Bordures */
+        --radius-sm: 8px;
+        --radius-md: 16px;
+        --radius-lg: 24px;
+        --radius-xl: 32px;
+
+        /* Transitions */
+        --transition-fast: 0.2s ease;
+        --transition-normal: 0.3s ease;
+        --transition-slow: 0.5s ease;
+    }
+
+    /* ===== PAGE TITLE ===== */
+    .page-title {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 80px 0 60px;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 40px;
+    }
+
+    .page-title::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 60%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(67, 97, 238, 0.03) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .breadcrumb {
+        background: transparent;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+
+    .breadcrumb-item a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition-normal);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .breadcrumb-item a:hover {
+        color: var(--primary);
+        transform: translateX(-2px);
+    }
+
+    .breadcrumb-item.active {
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .title-wrapper h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 15px;
+        letter-spacing: -1px;
+        animation: fadeInUp 0.6s ease;
+    }
+
+    .title-wrapper p {
+        font-size: 1.2rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        line-height: 1.6;
+        animation: fadeInUp 0.6s ease 0.2s both;
+    }
+
+    /* ===== ALERTS ===== */
+    .alert {
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 1.25rem 1.5rem;
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(10px);
+        margin-bottom: 30px;
+        animation: slideDown 0.4s ease;
+    }
+
+    .alert-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .alert-icon {
+        font-size: 1.75rem;
+    }
+
+    .alert-success {
+        background: rgba(6, 214, 160, 0.1);
+        border-left: 4px solid var(--success);
+    }
+
+    .alert-success .alert-icon {
+        color: var(--success);
+    }
+
+    .alert-error {
+        background: rgba(239, 71, 111, 0.1);
+        border-left: 4px solid var(--error);
+    }
+
+    .alert-error .alert-icon {
+        color: var(--error);
+    }
+
+    .alert-text {
+        flex: 1;
+    }
+
+    .alert-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .alert-message {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .alert-close {
+        background: none;
+        border: none;
+        font-size: 1.25rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        padding: 0;
+        transition: var(--transition-fast);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .alert-close:hover {
+        background: rgba(0, 0, 0, 0.05);
+        color: var(--text-primary);
+        transform: rotate(90deg);
+    }
+
+    /* ===== APPOINTMENT INFO SECTION ===== */
+    .appointment.section {
+        padding: 0 0 80px;
+    }
+
+    .appointment-info {
+        background: var(--bg-white);
+        padding: 40px;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        position: sticky;
+        top: 100px;
+        border: 1px solid var(--border-color);
+        transition: var(--transition-normal);
+    }
+
+    .appointment-info:hover {
+        box-shadow: var(--shadow-hover);
+        transform: translateY(-5px);
+    }
+
+    .appointment-info h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 20px;
+        position: relative;
+        padding-bottom: 15px;
+    }
+
+    .appointment-info h3::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 4px;
+        background: var(--gradient-primary);
+        border-radius: 2px;
+    }
+
+    .info-items {
+        margin: 30px 0;
+    }
+
+    .info-item {
+        padding: 20px;
+        background: var(--bg-light);
+        border-radius: var(--radius-lg);
+        transition: var(--transition-normal);
+        border: 1px solid transparent;
+    }
+
+    .info-item:hover {
+        background: var(--bg-white);
+        border-color: var(--primary);
+        transform: translateX(10px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .icon-wrapper {
+        width: 60px;
+        height: 60px;
+        background: var(--gradient-primary);
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.75rem;
+        flex-shrink: 0;
+        box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
+        transition: var(--transition-normal);
+    }
+
+    .info-item:hover .icon-wrapper {
+        transform: scale(1.1) rotate(5deg);
+    }
+
+    .info-item h5 {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 5px;
+    }
+
+    .info-item p {
+        color: var(--text-secondary);
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    .emergency-card {
+        background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
+        border-left: 4px solid var(--error);
+        border-radius: var(--radius-lg);
+        padding: 20px !important;
+        transition: var(--transition-normal);
+    }
+
+    .emergency-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .emergency-card h6 {
+        color: var(--error);
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .emergency-card p {
+        margin: 0;
+        font-size: 1rem;
+    }
+
+    .emergency-card strong {
+        color: var(--error);
+        font-size: 1.2rem;
+    }
+
+    /* ===== APPOINTMENT FORM ===== */
+    .appointment-form-wrapper {
+        background: var(--bg-white);
+        padding: 40px;
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+    }
+
+    .appointment-form {
+        position: relative;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-control,
+    .form-select {
+        border: 2px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 12px 16px;
+        font-size: 1rem;
+        transition: var(--transition-fast);
+        background: var(--bg-white);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.1);
+        outline: none;
+    }
+
+    .form-control:hover,
+    .form-select:hover {
+        border-color: var(--primary-light);
+    }
+
+    .form-control:read-only {
+        background: var(--bg-light);
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+
+    /* ===== DATE & TIME PICKERS ===== */
+    .date-picker-wrapper,
+    .time-picker-wrapper {
+        position: relative;
+        cursor: pointer;
+        transition: var(--transition-normal);
+    }
+
+    .calendar-preview,
+    .clock-preview {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+        border-radius: var(--radius-md);
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: white;
+        font-weight: 500;
+        box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
+        transition: var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .clock-preview {
+        background: linear-gradient(135deg, var(--accent) 0%, #b5179e 100%);
+        box-shadow: 0 10px 20px rgba(247, 37, 133, 0.2);
+    }
+
+    .calendar-preview::before,
+    .clock-preview::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+
+    .calendar-preview:hover,
+    .clock-preview:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .calendar-icon,
+    .clock-icon {
+        font-size: 1.5rem;
+        filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.1));
+        position: relative;
+        z-index: 2;
+    }
+
+    .selected-date,
+    .selected-time {
+        position: relative;
+        z-index: 2;
+        font-size: 1rem;
+    }
+
+    .calendar-preview.has-value {
+        background: var(--gradient-success);
+    }
+
+    .clock-preview.has-value {
+        background: var(--gradient-warning);
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ===== CALENDAR LEGEND ===== */
+    .calendar-legend {
+        background: var(--bg-light);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        margin: 20px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        border: 1px solid var(--border-color);
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .legend-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        transition: var(--transition-fast);
+    }
+
+    .legend-item:hover .legend-color {
+        transform: scale(1.2);
+    }
+
+    .legend-color.available {
+        background: var(--primary);
+        box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+    }
+
+    .legend-color.booked {
+        background: var(--error);
+        box-shadow: 0 4px 8px rgba(239, 71, 111, 0.3);
+    }
+
+    .legend-color.future {
+        background: var(--text-muted);
+        opacity: 0.5;
+    }
+
+    .legend-color.today {
+        background: var(--gradient-primary);
+        box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+    }
+
+    .legend-color.weekend {
+        background: var(--border-color);
+        border: 2px dashed var(--text-muted);
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress {
+        background: var(--bg-light);
+        border-radius: 10px;
+        height: 8px !important;
+        overflow: hidden;
+        margin: 20px 0;
+    }
+
+    .progress-bar {
+        background: var(--gradient-primary);
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+        transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% {
+            left: -100%;
+        }
+
+        100% {
+            left: 100%;
+        }
+    }
+
+    .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+        padding: 12px 30px;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 1rem;
+        transition: var(--transition-normal);
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 2px solid var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-outline:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    /* ===== LOADING SPINNER ===== */
+    .loading-spinner {
+        padding: 30px;
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        border-width: 0.25rem;
+        border-color: var(--primary) transparent transparent transparent;
+    }
+
+    .loading-spinner p {
+        margin-top: 15px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    /* ===== PROCESS STEPS ===== */
+    .process-steps {
+        margin-top: 80px;
+        padding: 60px 0 0;
+        position: relative;
+    }
+
+    .process-steps::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 10%;
+        right: 10%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        opacity: 0.3;
+    }
+
+    .step-item {
+        text-align: center;
+        padding: 30px 20px;
+        background: var(--bg-white);
+        border-radius: var(--radius-xl);
+        transition: var(--transition-normal);
+        position: relative;
+        z-index: 1;
+        height: 100%;
+        border: 1px solid transparent;
+    }
+
+    .step-item:hover {
+        transform: translateY(-15px);
+        border-color: var(--primary);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .step-number {
+        position: absolute;
+        top: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 40px;
+        background: var(--gradient-primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        box-shadow: 0 8px 16px rgba(67, 97, 238, 0.3);
+        z-index: 2;
+    }
+
+    .step-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--bg-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px auto;
+        font-size: 2.5rem;
+        color: var(--primary);
+        transition: var(--transition-normal);
+    }
+
+    .step-item:hover .step-icon {
+        background: var(--gradient-primary);
+        color: white;
+        transform: scale(1.1) rotate(360deg);
+    }
+
+    .step-item h5 {
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+    }
+
+    .step-item p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ===== STEP ANIMATIONS ===== */
+    .step-active {
+        animation: fadeInRight 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes fadeInRight {
+        from {
+            opacity: 0;
+            transform: translateX(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ===== FLATPICKR CUSTOMIZATION ===== */
+    .flatpickr-calendar {
+        border-radius: var(--radius-lg) !important;
+        box-shadow: var(--shadow-lg) !important;
+        border: none !important;
+        font-family: inherit !important;
+        overflow: hidden;
+    }
+
+    .flatpickr-months {
+        background: var(--gradient-primary) !important;
+        padding: 10px 0 !important;
+    }
+
+    .flatpickr-month {
+        color: white !important;
+    }
+
+    .flatpickr-weekday {
+        color: var(--primary) !important;
+        font-weight: 600 !important;
+        background: var(--bg-light) !important;
+    }
+
+    .flatpickr-day {
+        border-radius: 50% !important;
+        transition: var(--transition-fast) !important;
+    }
+
+    .flatpickr-day:hover {
+        background: var(--primary-light) !important;
+        color: white !important;
+        transform: scale(1.1);
+    }
+
+    .flatpickr-day.today {
+        background: var(--gradient-primary) !important;
+        color: white !important;
+        font-weight: 700 !important;
+    }
+
+    .flatpickr-day.selected {
+        background: var(--gradient-success) !important;
+        color: white !important;
+        font-weight: 700 !important;
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 992px) {
+        .appointment-info {
+            position: static;
+            margin-bottom: 30px;
+        }
+
+        .step-item {
+            margin-bottom: 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            padding: 60px 0 40px;
+        }
+
+        .title-wrapper h1 {
+            font-size: 2.2rem;
+        }
+
+        .title-wrapper p {
+            font-size: 1rem;
+        }
+
+        .appointment-info,
+        .appointment-form-wrapper {
+            padding: 25px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            width: 100%;
+        }
+
+        .calendar-legend {
+            gap: 10px;
+        }
+
+        .legend-item {
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .appointment-info h3 {
+            font-size: 1.6rem;
+        }
+
+        .info-item {
+            padding: 15px;
+        }
+
+        .icon-wrapper {
+            width: 45px;
+            height: 45px;
+            font-size: 1.25rem;
+        }
+
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            font-size: 2rem;
+        }
+    }
+
+    /* ===== UTILITY CLASSES ===== */
+    .text-gradient {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .hover-scale {
+        transition: var(--transition-normal);
+    }
+
+    .hover-scale:hover {
+        transform: scale(1.05);
+    }
+
+    /* ===== CUSTOM SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--bg-light);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--gradient-primary);
+        border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--gradient-accent);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+
+<script>
+    // ==================== VARIABLES GLOBALES ====================
+    const API_BASE_URL = '/api';
+    let currentStep = 1;
+    const totalSteps = 4;
+    let datePicker = null;
+    let availableDates = [];
+    let bookedDates = [];
+
+    // Éléments DOM
+    const appointmentForm = document.getElementById('appointmentForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingSpinner = document.querySelector('.loading-spinner');
+    const successAlert = document.getElementById('successAlert');
+    const errorAlert = document.getElementById('errorAlert');
+    const errorMessage = document.getElementById('errorMessage');
+    const hospitalSelect = document.getElementById('hospitalSelect');
+    const doctorSelect = document.getElementById('doctorSelect');
+    const appointmentDate = document.getElementById('appointmentDate');
+    const appointmentTime = document.getElementById('appointmentTime');
+    const selectedDateDisplay = document.getElementById('selectedDateDisplay');
+    const selectedTimeDisplay = document.getElementById('selectedTimeDisplay');
+    const datePickerWrapper = document.getElementById('datePickerWrapper');
+    const timePickerWrapper = document.getElementById('timePickerWrapper');
+
+    // Éléments DOM pour les étapes
+    const stepHospital = document.getElementById('step-hospital');
+    const stepPatientInfo = document.getElementById('step-patient-info');
+    const stepDateDoctor = document.getElementById('step-date-doctor');
+    const stepAdditionalInfo = document.getElementById('step-additional-info');
+    const formProgress = document.getElementById('formProgress');
+
+    // ==================== PRÉ-REMPLISSAGE AUTOMATIQUE AVEC VERROUILLAGE ====================
+
+    function prefillAndLockUserData() {
+        console.log('🔒 Verrouillage des données utilisateur...');
+
+        // Récupérer les champs
+        const nameField = document.querySelector('input[name="patient_name"]');
+        const emailField = document.querySelector('input[name="patient_email"]');
+        const phoneField = document.querySelector('input[name="patient_phone"]');
+
+        // Récupérer les données utilisateur depuis Django
+        let firstName = "{{ user.first_name|default:'' }}";
+        let lastName = "{{ user.last_name|default:'' }}";
+        let fullName = (firstName + ' ' + lastName).trim();
+
+        if (!fullName || fullName === '') {
+            fullName = "{{ user.get_full_name|default:'' }}".trim();
+        }
+
+        if (!fullName || fullName === '') {
+            fullName = "{{ user.username|default:'Utilisateur' }}";
+        }
+
+        // Récupération du téléphone DIRECTEMENT depuis l'utilisateur
+        let userPhone = "{{ user.phone_number|default:'' }}";
+
+        // Debug
+        console.log('📞 Téléphone brut depuis Django:', "{{ user.phone_number|default:'NON DEFINI' }}");
+        console.log('📞 Téléphone après traitement:', userPhone);
+
+        const userData = {
+            name: fullName || 'Nom non disponible',
+            email: "{{ user.email|default:'' }}" || 'email@non.disponible',
+            phone: userPhone || 'Numéro non renseigné'
+        };
+
+        console.log('📋 Données utilisateur récupérées:', userData);
+
+        // Pré-remplir et verrouiller les champs
+        if (nameField) {
+            nameField.value = userData.name;
+            nameField.readOnly = true;
+            console.log('👤 Nom rempli:', nameField.value);
+        }
+
+        if (emailField) {
+            emailField.value = userData.email;
+            emailField.readOnly = true;
+            console.log('📧 Email rempli:', emailField.value);
+        }
+
+        if (phoneField) {
+            phoneField.value = userData.phone;
+            phoneField.readOnly = true;
+            console.log('📞 Téléphone rempli:', phoneField.value);
+        }
+
+        console.log('✅ Champs verrouillés avec succès');
+    }
+
+    // ==================== INITIALISATION ====================
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('🚀 Initialisation de la page rendez-vous');
+        loadHospitals();
+        setMinDate();
+        updateProgress();
+        initTimePicker();
+
+        // AOS initialization
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 1000,
+                easing: 'ease-in-out',
+                once: true,
+                mirror: false
+            });
+        }
+
+        testAPI();
+    });
+
+    // ==================== GESTION DES ÉTAPES ====================
+    function updateProgress() {
+        const progress = (currentStep / totalSteps) * 100;
+        formProgress.style.width = `${progress}%`;
+        formProgress.setAttribute('aria-valuenow', progress);
+    }
+
+    function goToStep(step) {
+        // Cacher toutes les étapes
+        [stepHospital, stepPatientInfo, stepDateDoctor, stepAdditionalInfo].forEach(stepEl => {
+            stepEl.classList.add('d-none');
+            stepEl.classList.remove('step-active');
+        });
+
+        // Afficher l'étape courante
+        switch (step) {
+            case 1:
+                stepHospital.classList.remove('d-none');
+                stepHospital.classList.add('step-active');
+                break;
+            case 2:
+                stepPatientInfo.classList.remove('d-none');
+                stepPatientInfo.classList.add('step-active');
+                break;
+            case 3:
+                stepDateDoctor.classList.remove('d-none');
+                stepDateDoctor.classList.add('step-active');
+                // Charger les médecins si un hôpital est sélectionné
+                const hospitalId = hospitalSelect.value;
+                if (hospitalId) {
+                    loadDoctors(hospitalId);
+                }
+                // Initialiser le calendrier
+                setTimeout(initDatePicker, 100);
+                break;
+            case 4:
+                stepAdditionalInfo.classList.remove('d-none');
+                stepAdditionalInfo.classList.add('step-active');
+                break;
+        }
+
+        currentStep = step;
+        updateProgress();
+    }
+
+    // Écouteurs pour les boutons de navigation
+    document.getElementById('btnNextStep1').addEventListener('click', function () {
+        if (hospitalSelect.value) {
+            // Pré-remplir avant d'aller à l'étape 2
+            setTimeout(prefillAndLockUserData, 100);
+            goToStep(2);
+        } else {
+            alert('Veuillez sélectionner un hôpital');
+        }
+    });
+
+    document.getElementById('btnNextStep2').addEventListener('click', function () {
+        // Validation basique des champs patient
+        const patientName = document.querySelector('input[name="patient_name"]').value;
+        const patientEmail = document.querySelector('input[name="patient_email"]').value;
+        const patientPhone = document.querySelector('input[name="patient_phone"]').value;
+        const ultrasoundType = document.querySelector('select[name="ultrasound_type"]').value;
+
+        if (patientName && patientEmail && patientPhone && ultrasoundType) {
+            goToStep(3);
+        } else {
+            alert('Veuillez remplir tous les champs obligatoires');
+        }
+    });
+
+    document.getElementById('btnNextStep3').addEventListener('click', function () {
+        const dateValue = appointmentDate.value;
+        const doctor = doctorSelect.value;
+        const timeValue = appointmentTime.value;
+
+        if (dateValue && doctor && timeValue) {
+            goToStep(4);
+        } else {
+            alert('Veuillez remplir tous les champs obligatoires');
+        }
+    });
+
+    // Boutons précédent
+    document.getElementById('btnPrevStep2').addEventListener('click', () => goToStep(1));
+    document.getElementById('btnPrevStep3').addEventListener('click', () => goToStep(2));
+    document.getElementById('btnPrevStep4').addEventListener('click', () => goToStep(3));
+
+    // ==================== FONCTIONS DE CHARGEMENT ====================
+
+    // Charger les hôpitaux disponibles
+    async function loadHospitals() {
+        try {
+            console.log('🔄 Chargement des hôpitaux...');
+            const response = await fetch(`${API_BASE_URL}/hospitals/`);
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
+            }
+
+            const hospitals = await response.json();
+            console.log('🏥 Hôpitaux chargés:', hospitals);
+
+            hospitalSelect.innerHTML = '<option value="">Sélectionnez un hôpital</option>';
+
+            if (hospitals && hospitals.length > 0) {
+                hospitals.forEach(hospital => {
+                    const option = document.createElement('option');
+                    option.value = hospital.id;
+                    option.textContent = hospital.name;
+                    hospitalSelect.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Aucun hôpital disponible';
+                hospitalSelect.appendChild(option);
+            }
+        } catch (error) {
+            console.error('❌ Erreur chargement hôpitaux:', error);
+            hospitalSelect.innerHTML = '<option value="">Erreur de chargement des hôpitaux</option>';
+        }
+    }
+
+    // Charger les médecins disponibles pour un hôpital
+    async function loadDoctors(hospitalId) {
+        try {
+            console.log(`🔴 DEBUG - Début loadDoctors avec hospitalId: ${hospitalId}`);
+
+            // Afficher un état de chargement
+            doctorSelect.innerHTML = '<option value="">Chargement des médecins...</option>';
+
+            const url = `${API_BASE_URL}/doctors/?hospital_id=${hospitalId}`;
+            console.log(`🔴 DEBUG - URL: ${url}`);
+
+            const response = await fetch(url);
+            console.log(`🔴 DEBUG - Status: ${response.status}`);
+            console.log(`🔴 DEBUG - OK: ${response.ok}`);
+
+            if (!response.ok) {
+                throw new Error(`Erreur HTTP: ${response.status} - ${response.statusText}`);
+            }
+
+            const responseText = await response.text();
+            console.log(`🔴 DEBUG - Réponse brute:`, responseText);
+
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('❌ Erreur parsing JSON:', parseError);
+                throw new Error('Réponse invalide du serveur');
+            }
+
+            console.log('🔴 DEBUG - Données parsées:', data);
+
+            // VIDER le select avant d'ajouter de nouvelles options
+            doctorSelect.innerHTML = '<option value="">Choisir le médecin</option>';
+
+            // Gestion des différentes structures de réponse
+            let doctorsArray = [];
+
+            if (Array.isArray(data)) {
+                doctorsArray = data;
+                console.log(`🔴 DEBUG - Structure: Tableau simple (${doctorsArray.length} médecins)`);
+            } else if (data.results && Array.isArray(data.results)) {
+                doctorsArray = data.results;
+                console.log(`🔴 DEBUG - Structure: Pagination results (${doctorsArray.length} médecins)`);
+            } else if (data.doctors && Array.isArray(data.doctors)) {
+                doctorsArray = data.doctors;
+                console.log(`🔴 DEBUG - Structure: Objet doctors (${doctorsArray.length} médecins)`);
+            } else if (data.data && Array.isArray(data.data)) {
+                doctorsArray = data.data;
+                console.log(`🔴 DEBUG - Structure: Objet data (${doctorsArray.length} médecins)`);
+            } else {
+                console.log('🔴 DEBUG - Structure inconnue, tentative d extraction...', data);
+                for (const key in data) {
+                    if (Array.isArray(data[key]) && data[key].length > 0) {
+                        doctorsArray = data[key];
+                        console.log(`🔴 DEBUG - Structure: Clé "${key}" (${doctorsArray.length} médecins)`);
+                        break;
+                    }
+                }
+            }
+
+            console.log(`🔴 DEBUG - Médecins à afficher: ${doctorsArray.length}`, doctorsArray);
+
+            if (doctorsArray.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Aucun médecin disponible dans cet hôpital';
+                doctorSelect.appendChild(option);
+                console.log('⚠️ Aucun médecin trouvé pour cet hôpital');
+                return;
+            }
+
+            // Ajouter chaque médecin au select
+            doctorsArray.forEach((doctor, index) => {
+                console.log(`🔴 DEBUG - Médecin ${index}:`, doctor);
+
+                const option = document.createElement('option');
+                option.value = doctor.id;
+
+                // Gestion ROBUSTE du nom du médecin
+                let doctorName = 'Dr. Inconnu';
+                let specialityName = 'Spécialité inconnue';
+
+                if (doctor.full_name) {
+                    doctorName = doctor.full_name;
+                } else if (doctor.name) {
+                    doctorName = doctor.name;
+                } else if (doctor.doctor_name) {
+                    doctorName = doctor.doctor_name;
+                } else if (doctor.first_name && doctor.last_name) {
+                    doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`;
+                }
+
+                // Gestion de la spécialité
+                if (doctor.speciality) {
+                    if (typeof doctor.speciality === 'string') {
+                        specialityName = doctor.speciality;
+                    } else if (doctor.speciality.name) {
+                        specialityName = doctor.speciality.name;
+                    } else if (doctor.speciality_name) {
+                        specialityName = doctor.speciality_name;
+                    }
+                }
+
+                option.textContent = `${doctorName} - ${specialityName}`;
+                doctorSelect.appendChild(option);
+            });
+
+            console.log(`✅ ${doctorsArray.length} médecin(s) chargé(s) avec succès`);
+
+        } catch (error) {
+            console.error('❌ Erreur chargement médecins:', error);
+            doctorSelect.innerHTML = '<option value="">Erreur de chargement des médecins</option>';
+        }
+    }
+
+    // Charger les disponibilités depuis l'API
+    async function loadAvailability(doctorId) {
+        if (!doctorId) return;
+
+        try {
+            console.log('📅 Chargement des disponibilités pour le médecin:', doctorId);
+
+            const response = await fetch(`${API_BASE_URL}/appointments/availability/?doctor_id=${doctorId}`);
+
+            if (!response.ok) {
+                throw new Error('Erreur chargement disponibilités');
+            }
+
+            const data = await response.json();
+            console.log('📅 Données de disponibilité:', data);
+
+            // Transformer les données pour Flatpickr
+            availableDates = [];
+            bookedDates = [];
+
+            if (data.available_slots) {
+                // data.available_slots = { "2026-03-15": ["09:00", "10:00"], ... }
+                Object.keys(data.available_slots).forEach(date => {
+                    availableDates.push(date);
+                });
+            }
+
+            if (data.booked_slots) {
+                bookedDates = data.booked_slots.map(slot => slot.date);
+            }
+
+            console.log('✅ Dates disponibles chargées:', availableDates);
+            console.log('✅ Dates déjà réservées:', bookedDates);
+
+            // Mettre à jour le calendrier
+            if (datePicker) {
+                datePicker.set('enable', availableDates);
+                datePicker.redraw();
+            }
+
+        } catch (error) {
+            console.error('❌ Erreur chargement disponibilités:', error);
+        }
+    }
+
+    // Charger les créneaux horaires disponibles
+    async function loadAvailableTimeSlots(doctorId, date) {
+        try {
+            if (!doctorId || !date) {
+                appointmentTime.innerHTML = '<option value="">Choisir d abord médecin et date</option>';
+                return;
+            }
+
+            console.log(`🕒 Chargement créneaux pour médecin ${doctorId} à ${date}`);
+
+            // Afficher chargement
+            appointmentTime.innerHTML = '<option value="">Chargement des horaires...</option>';
+
+            const response = await fetch(
+                `${API_BASE_URL}/appointments/available_time_slots/?doctor_id=${doctorId}&date=${date}`
+            );
+
+            if (!response.ok) throw new Error('Erreur chargement créneaux');
+
+            const data = await response.json();
+
+            // VIDER les options
+            appointmentTime.innerHTML = '<option value="">Choisir l heure</option>';
+
+            // Obtenir la date et l'heure actuelles
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+
+            console.log(`🕒 Heure actuelle: ${currentHour}:${currentMinute}, Date sélectionnée: ${date}`);
+
+            if (data.available_slots && data.available_slots.length > 0) {
+                const sortedSlots = data.available_slots.sort();
+                let hasAvailableSlots = false;
+
+                sortedSlots.forEach(slot => {
+                    const [slotHour, slotMinute] = slot.split(':').map(Number);
+                    const isToday = date === todayStr;
+                    const isPast = isToday && (
+                        slotHour < currentHour ||
+                        (slotHour === currentHour && slotMinute <= currentMinute)
+                    );
+
+                    const option = document.createElement('option');
+                    option.value = slot;
+
+                    if (isPast) {
+                        option.disabled = true;
+                        option.textContent = `${slot} (dépassé)`;
+                        option.classList.add('text-muted', 'bg-light', 'disabled-option');
+                    } else {
+                        option.textContent = slot;
+                        hasAvailableSlots = true;
+                    }
+
+                    appointmentTime.appendChild(option);
+                });
+
+                if (!hasAvailableSlots && date === todayStr) {
+                    const emptyOption = document.createElement('option');
+                    emptyOption.value = '';
+                    emptyOption.textContent = 'Plus aucun créneau disponible aujourd\'hui';
+                    emptyOption.disabled = true;
+                    emptyOption.selected = true;
+                    appointmentTime.innerHTML = '';
+                    appointmentTime.appendChild(emptyOption);
+                }
+
+                console.log(`✅ ${data.available_slots.length} créneaux chargés (${appointmentTime.options.length - 1} disponibles)`);
+            } else {
+                appointmentTime.innerHTML = '<option value="">Aucun créneau disponible</option>';
+                console.log('⚠️ Aucun créneau disponible');
+            }
+
+        } catch (error) {
+            console.error('❌ Erreur chargement créneaux:', error);
+            appointmentTime.innerHTML = '<option value="">Erreur chargement horaires</option>';
+        }
+    }
+
+    // ==================== CONFIGURATION DU CALENDRIER ====================
+
+    function initDatePicker() {
+        const dateInput = document.getElementById('appointmentDate');
+
+        if (!dateInput) return;
+
+        // Traductions françaises
+        flatpickr.localize(flatpickr.l10ns.fr);
+
+        // Initialiser Flatpickr
+        datePicker = flatpickr(dateInput, {
+            locale: 'fr',
+            dateFormat: 'Y-m-d',
+            minDate: 'today',
+            altInput: true,
+            altFormat: 'j F Y',
+            allowInput: false,
+            disableMobile: true,
+
+            // Fonction pour déterminer les classes CSS des dates
+            onDayCreate: function (dObj, dStr, fp, dayElem) {
+                const date = dayElem.dateObj;
+                const dateStr = date.toISOString().split('T')[0];
+
+                // Date d'aujourd'hui
+                const today = new Date();
+                const todayStr = today.toISOString().split('T')[0];
+
+                // Si c'est aujourd'hui
+                if (dateStr === todayStr) {
+                    dayElem.classList.add('today');
+                }
+
+                // Si la date est disponible (VERT)
+                if (availableDates.includes(dateStr)) {
+                    dayElem.classList.add('available');
+                }
+
+                // Si la date est déjà réservée (BLEU)
+                if (bookedDates.includes(dateStr)) {
+                    dayElem.classList.add('booked');
+                }
+
+                // Si c'est une date future non disponible (ORANGE)
+                if (date > today && !availableDates.includes(dateStr) && !bookedDates.includes(dateStr)) {
+                    dayElem.classList.add('future');
+                }
+
+                // Week-ends
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    dayElem.classList.add('weekend');
+                }
+            },
+
+            // Quand une date est sélectionnée
+            onChange: function (selectedDates, dateStr, instance) {
+                if (selectedDates.length > 0) {
+                    // Formater la date pour l'affichage
+                    const options = {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    };
+                    const formattedDate = selectedDates[0].toLocaleDateString('fr-FR', options);
+                    selectedDateDisplay.textContent = formattedDate;
+
+                    // Ajouter la classe has-value
+                    document.querySelector('.calendar-preview').classList.add('has-value');
+
+                    // Charger les créneaux horaires pour cette date
+                    const doctorId = doctorSelect.value;
+                    if (doctorId) {
+                        loadAvailableTimeSlots(doctorId, dateStr);
+                    }
+                } else {
+                    selectedDateDisplay.textContent = 'Choisir une date';
+                    document.querySelector('.calendar-preview').classList.remove('has-value');
+                }
+            },
+
+            onReady: function () {
+                console.log('📅 Calendrier prêt');
+            }
+        });
+
+        // Rendre le wrapper cliquable pour ouvrir le calendrier
+        if (datePickerWrapper) {
+            datePickerWrapper.addEventListener('click', function (e) {
+                e.preventDefault();
+                if (datePicker) {
+                    datePicker.open();
+                }
+            });
+        }
+    }
+
+    // ==================== CONFIGURATION DE L'HORLOGE ====================
+
+    function initTimePicker() {
+        const timeInput = document.getElementById('appointmentTime');
+
+        timeInput.addEventListener('change', function (e) {
+            const clockPreview = document.querySelector('.clock-preview');
+
+            if (this.value) {
+                selectedTimeDisplay.textContent = this.value;
+                clockPreview.classList.add('has-value');
+            } else {
+                selectedTimeDisplay.textContent = 'Choisir une heure';
+                clockPreview.classList.remove('has-value');
+            }
+        });
+
+        // Rendre le wrapper cliquable pour ouvrir l'horloge
+        if (timePickerWrapper) {
+            timePickerWrapper.addEventListener('click', function (e) {
+                e.preventDefault();
+                // Pour ouvrir le sélecteur d'heure natif
+                if (timeInput.showPicker) {
+                    timeInput.showPicker();
+                } else {
+                    timeInput.focus();
+                    setTimeout(() => timeInput.click(), 10);
+                }
+            });
+        }
+    }
+
+    // ==================== ÉCOUTEURS D'ÉVÉNEMENTS ====================
+
+    hospitalSelect.addEventListener('change', function () {
+        const hospitalId = this.value;
+        console.log(`🔴 DEBUG - Hôpital changé: ${hospitalId}`);
+
+        if (hospitalId) {
+            loadDoctors(hospitalId);
+        } else {
+            doctorSelect.innerHTML = '<option value="">Choisir le médecin</option>';
+            appointmentTime.innerHTML = '<option value="">Choisir d abord hôpital</option>';
+        }
+    });
+
+    doctorSelect.addEventListener('change', function () {
+        const doctorId = this.value;
+        const date = appointmentDate.value;
+
+        if (doctorId) {
+            loadAvailability(doctorId);
+        }
+
+        if (doctorId && date) {
+            loadAvailableTimeSlots(doctorId, date);
+        } else {
+            appointmentTime.innerHTML = '<option value="">Choisir d abord médecin et date</option>';
+        }
+    });
+
+    // ==================== FONCTIONS UTILITAIRES ====================
+
+    function isWeekend(dateString) {
+        const date = new Date(dateString);
+        return date.getDay() === 0 || date.getDay() === 6;
+    }
+
+    function setMinDate() {
+        const today = new Date().toISOString().split('T')[0];
+        if (appointmentDate) {
+            appointmentDate.min = today;
+        }
+    }
+
+    function getCSRFToken() {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        return csrfToken ? csrfToken.value : '';
+    }
+
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorAlert.style.display = 'block';
+        errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        resetSubmitButton();
+    }
+
+    function showSuccess(message = 'Rendez-vous créé avec succès!') {
+        successAlert.querySelector('strong').textContent = message;
+        successAlert.style.display = 'block';
+        successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function resetSubmitButton() {
+        loadingSpinner.style.display = 'none';
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-calendar-plus me-2"></i>Prendre Rendez-vous';
+    }
+
+    function resetForm() {
+        appointmentForm.reset();
+        hospitalSelect.innerHTML = '<option value="">Sélectionnez un hôpital</option>';
+        doctorSelect.innerHTML = '<option value="">Choisir le médecin</option>';
+        appointmentTime.innerHTML = '<option value="">Choisir l heure</option>';
+        selectedDateDisplay.textContent = 'Choisir une date';
+        selectedTimeDisplay.textContent = 'Choisir une heure';
+        document.querySelector('.calendar-preview').classList.remove('has-value');
+        document.querySelector('.clock-preview').classList.remove('has-value');
+        loadHospitals();
+        setMinDate();
+        goToStep(1);
+    }
+
+    // ==================== SOUMISSION DU FORMULAIRE ====================
+
+    appointmentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Vérification que le téléphone est bien rempli
+        const phoneValue = document.querySelector('input[name="patient_phone"]').value;
+        console.log('📞 Téléphone avant envoi:', phoneValue);
+
+        if (!phoneValue || phoneValue === 'Numéro non renseigné') {
+            showError('Votre numéro de téléphone est requis. Veuillez le renseigner dans votre profil.');
+            resetSubmitButton();
+            return;
+        }
+
+        // Désactiver immédiatement le formulaire
+        loadingSpinner.style.display = 'block';
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Création en cours...';
+        successAlert.style.display = 'none';
+        errorAlert.style.display = 'none';
+
+        // Validation rapide des sélections
+        const hospitalId = hospitalSelect.value;
+        const doctorId = doctorSelect.value;
+
+        if (!hospitalId || !doctorId) {
+            showError('Veuillez sélectionner un hôpital et un médecin');
+            resetSubmitButton();
+            return;
+        }
+
+        try {
+            const formData = new FormData(appointmentForm);
+            const dateValue = formData.get('scheduled_date');
+            const timeValue = formData.get('scheduled_time');
+
+            if (!dateValue || !timeValue) {
+                showError('Veuillez sélectionner une date et une heure');
+                resetSubmitButton();
+                return;
+            }
+
+            console.log('✅ Date/heure sélectionnée:', `${dateValue} ${timeValue}`);
+
+            const scheduledDateTime = `${dateValue} ${timeValue}`;
+
+            const appointmentData = {
+                patient_name: formData.get('patient_name').trim(),
+                patient_email: formData.get('patient_email').trim(),
+                patient_phone: formData.get('patient_phone').trim(),
+                hospital: parseInt(hospitalId),
+                doctor: parseInt(doctorId),
+                scheduled_date: scheduledDateTime,
+                reason: (formData.get('reason') || '').trim(),
+                ultrasound_type: formData.get('ultrasound_type'),
+                pregnancy_week: formData.get('pregnancy_week') ? parseInt(formData.get('pregnancy_week')) : null
+            };
+
+            console.log('🚀 Données envoyées à l\'API:', appointmentData);
+
+            const response = await fetch(`${API_BASE_URL}/appointments/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify(appointmentData)
+            });
+
+            console.log('📥 Status HTTP:', response.status);
+
+            const responseText = await response.text();
+            console.log('📨 Réponse API:', responseText);
+
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('❌ Réponse non-JSON:', responseText);
+                throw new Error('Erreur de communication avec le serveur.');
+            }
+
+            if (response.ok && result.success) {
+                handleSuccess(result);
+            } else {
+                handleApiError(result, response);
+            }
+
+        } catch (error) {
+            handleRequestError(error);
+        }
+    });
+
+    function handleSuccess(result) {
+        console.log('✅ Succès:', result);
+        showSuccess(result.message || 'Rendez-vous créé avec succès!');
+
+        setTimeout(() => {
+            resetForm();
+        }, 2000);
+
+        if (result.appointment_id) {
+            setTimeout(() => {
+                window.location.href = `/appointment/success/${result.appointment_id}/`;
+            }, 1500);
+        } else if (result.redirect_url) {
+            setTimeout(() => {
+                window.location.href = result.redirect_url;
+            }, 1500);
+        }
+    }
+
+    function handleApiError(result, response) {
+        console.error('❌ Erreur API:', result);
+
+        let errorMessage = 'Erreur lors de la création du rendez-vous';
+
+        if (result.error) {
+            errorMessage = result.error;
+        } else if (result.detail) {
+            errorMessage = result.detail;
+        } else if (result.message) {
+            errorMessage = result.message;
+        } else if (result.non_field_errors && result.non_field_errors.length > 0) {
+            errorMessage = result.non_field_errors[0];
+        } else if (response.status === 400) {
+            errorMessage = 'Données invalides. Vérifiez les informations saisies.';
+        } else if (response.status === 500) {
+            errorMessage = 'Erreur serveur. Réessayez dans quelques instants.';
+        }
+
+        showError(errorMessage);
+    }
+
+    function handleRequestError(error) {
+        console.error('❌ Erreur de requête:', error);
+
+        let userMessage = 'Erreur lors de la création du rendez-vous';
+
+        if (error.name === 'AbortError') {
+            userMessage = 'La requête a pris trop de temps. Réessayez.';
+        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+            userMessage = 'Problème de connexion. Vérifiez votre internet.';
+        } else if (error.message) {
+            userMessage = error.message;
+        }
+
+        showError(userMessage);
+    }
+
+    // ✅ FONCTION DE TEST API
+    async function testAPI() {
+        try {
+            console.log('🧪 Test de l\'API...');
+            const testResponse = await fetch(`${API_BASE_URL}/hospitals/`);
+            console.log('🧪 Test API - Status:', testResponse.status);
+            console.log('🧪 Test API - OK:', testResponse.ok);
+        } catch (error) {
+            console.error('🧪 Test API - Erreur:', error);
+        }
+    }
+</script>
+{% endblock %}
