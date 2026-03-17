@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     # Applications tierces
     'rest_framework',
     'corsheaders',
-    'xhtml2pdf',
     # Votre application
     'mapli',
 ]
