@@ -14,8 +14,8 @@ from .models import (
 # ============================================
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'user_type', 'is_approved', 'is_active')
-    list_filter = ('role', 'user_type', 'is_approved', 'is_active', 'is_staff')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'role', 'is_approved', 'is_active')  # user_type → role
+    list_filter = ('role', 'is_approved', 'is_active', 'is_staff')  # user_type → role
     search_fields = ('username', 'email', 'first_name', 'last_name', 'phone_number')
     ordering = ('-date_joined',)
     
@@ -27,7 +27,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('country', 'province', 'commune', 'district')
         }),
         ('Rôle et statut', {
-            'fields': ('role', 'user_type', 'is_approved', 'is_active', 'is_staff', 'is_superuser')
+            'fields': ('role', 'is_approved', 'is_active', 'is_staff', 'is_superuser')  # user_type → role
         }),
         ('Grossesse', {
             'fields': ('is_pregnant', 'current_pregnancy_week', 'last_menstrual_period', 'blood_type', 'allergies'),
@@ -44,7 +44,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'role'),
+            'fields': ('username', 'email', 'first_name', 'last_name', 'password1', 'password2', 'role'),  # user_type → role
         }),
     )
 
