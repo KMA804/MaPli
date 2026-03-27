@@ -1,12 +1,37 @@
 # mail.py
-from django.core.mail import EmailMessage
+import logging
+
 from django.conf import settings
-from .receipts import generate_appointment_receipt  # Import de la nouvelle fonction
+from django.core.mail import EmailMultiAlternatives
+from django.core.validators import EmailValidator, ValidationError
+
+from ..email_utils import email_backend_delivers_to_internet
+from .receipts import generate_appointment_receipt
+
+logger = logging.getLogger(__name__)
 
 def send_appointment_confirmation_email(appointment):
-    """Envoie l'email de confirmation avec le PDF - VERSION CORRIGÉE"""
+    """
+    Envoie l'email de confirmation avec le PDF (une fois par rendez-vous).
+
+    Returns:
+        tuple[bool, str]: (succès livraison Internet, message d'erreur ou "")
+    """
     try:
-        subject = f"📄 Votre reçu de rendez-vous échographie - {appointment.registration_number}"
+        if getattr(appointment, "receipt_sent", False):
+            return True, ""
+
+        display_date = appointment.appointment_date
+        if display_date is None and appointment.scheduled_date:
+            display_date = (
+                appointment.scheduled_date.date()
+                if hasattr(appointment.scheduled_date, "date")
+                else appointment.scheduled_date
+            )
+
+        subject = (
+            f"MaPli — Confirmation rendez-vous échographie — {appointment.registration_number}"
+        )
         
         # Message HTML
         html_message = f"""
@@ -33,7 +58,8 @@ def send_appointment_confirmation_email(appointment):
                 
                 <div class="info-box">
                     <h3>📅 Détails de votre rendez-vous :</h3>
-                    <p><strong>Date :</strong> {appointment.appointment_date.strftime('%d/%m/%Y')}</p>
+                    <p><strong>Date :</strong> {display_date.strftime('%d/%m/%Y') if display_date else '—'}</p>
+                    <p><strong>Heure prévue :</strong> {appointment.scheduled_date.strftime('%H:%M') if appointment.scheduled_date else '—'}</p>
                     <p><strong>Hôpital :</strong> {appointment.hospital.name}</p>
                     <p><strong>Médecin :</strong> Dr. {appointment.doctor.name}</p>
                     <p><strong>Votre position :</strong> {appointment.daily_sequence}/20</p>
@@ -64,36 +90,78 @@ def send_appointment_confirmation_email(appointment):
         # Générer le PDF
         pdf_content = generate_appointment_receipt(appointment)
         
-        # Préparer l'email
-        email = EmailMessage(
-            subject=subject,
-            body=html_message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            to=[appointment.patient_email],
-            reply_to=[settings.DEFAULT_FROM_EMAIL]
+        plain = (
+            f"Bonjour {appointment.patient_name},\n\n"
+            f"Votre rendez-vous pour une échographie est confirmé.\n"
+            f"Date : {display_date.strftime('%d/%m/%Y') if display_date else '—'}\n"
+            f"Heure : {appointment.scheduled_date.strftime('%H:%M') if appointment.scheduled_date else '—'}\n"
+            f"Hôpital : {appointment.hospital.name}\n"
+            f"Médecin : Dr. {appointment.doctor.name}\n"
+            f"Numéro : {appointment.registration_number}\n\n"
+            f"Votre reçu PDF est en pièce jointe.\n"
+            f"— MaPli\n"
         )
-        email.content_subtype = "html"  # Email en HTML
-        
-        # Attacher le PDF
+
+        recipient = (appointment.patient_email or "").strip().lower()
+        if not recipient:
+            return False, "Adresse e-mail destinataire vide."
+        try:
+            EmailValidator()(recipient)
+        except ValidationError as exc:
+            err = exc.messages[0] if getattr(exc, "messages", None) else str(exc)
+            return False, f"Adresse e-mail invalide : {err}"
+
+        mail_kwargs = {
+            "subject": subject,
+            "body": plain,
+            "from_email": settings.DEFAULT_FROM_EMAIL,
+            "to": [recipient],
+            "headers": {
+                # Aide les filtres à classer le message comme notification transactionnelle (RFC 3834).
+                "Auto-Submitted": "auto-generated",
+            },
+        }
+        if settings.DEFAULT_FROM_EMAIL:
+            mail_kwargs["reply_to"] = [settings.DEFAULT_FROM_EMAIL]
+        bcc_list = [
+            addr
+            for addr in getattr(settings, "EMAIL_CONFIRMATION_BCC", []) or []
+            if addr and addr != recipient
+        ]
+        if bcc_list:
+            mail_kwargs["bcc"] = bcc_list
+        email = EmailMultiAlternatives(**mail_kwargs)
+        email.attach_alternative(html_message, "text/html")
         email.attach(
             f"recu_echographie_{appointment.registration_number}.pdf",
             pdf_content,
-            "application/pdf"
+            "application/pdf",
         )
-        
-        # Envoyer l'email
         email.send()
-        
-        # Marquer comme envoyé
+
+        if not email_backend_delivers_to_internet():
+            msg = (
+                f"Backend {settings.EMAIL_BACKEND!r} : pas d'envoi Internet "
+                "(ajoutez EMAIL_HOST_USER et EMAIL_HOST_PASSWORD dans .env, ou lisez la console du serveur)."
+            )
+            logger.warning(msg)
+            return False, msg
+
+        logger.info(
+            "Email de confirmation RDV transmis via SMTP (To=%s, bcc=%s, backend=%s, rdv_id=%s)",
+            recipient,
+            bcc_list if bcc_list else "—",
+            settings.EMAIL_BACKEND,
+            appointment.pk,
+        )
         appointment.receipt_sent = True
-        appointment.save(update_fields=['receipt_sent'])
-        
-        print(f"✅ Email envoyé à {appointment.patient_email}")
-        return True
-        
+        appointment.save(update_fields=["receipt_sent"])
+        return True, ""
+
     except Exception as e:
-        print(f"❌ Erreur envoi email: {str(e)}")
-        return False
+        logger.exception("Erreur envoi email confirmation RDV: %s", e)
+        err = str(e).strip() or e.__class__.__name__
+        return False, err
 
 # Fonction de secours pour compatibilité (si d'autres parties du code l'appellent)
 def generate_pdf_receipt(appointment):

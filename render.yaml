@@ -21,8 +21,9 @@ services:
       - key: DEBUG
         value: "False"
       - key: EMAIL_HOST_USER
-        value: "kanakimanamarieange8@gmail.com"
+        sync: false
       - key: EMAIL_HOST_PASSWORD
         sync: false
+      # Doit correspondre au compte SMTP (ex. meme adresse Gmail que EMAIL_HOST_USER)
       - key: DEFAULT_FROM_EMAIL
-        value: "noreply@meditrust.maternite"
+        sync: false

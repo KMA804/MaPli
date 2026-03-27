@@ -1,18 +1,14 @@
 # views.py
+from django.conf import settings
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
-from django.conf import settings
-from django.utils import timezone  # ← AJOUT IMPORTANT
-import uuid
-from datetime import datetime, timedelta, time  
+from datetime import datetime, timedelta, time
 from ..models import Speciality, Doctor, Patient, Pregnancy, Appointment, PregnancyAppointment, Hospital
 from ..serializers import *
-from .receipts import generate_appointment_receipt, get_pdf_response
-from django.contrib.auth.decorators import login_required
+from .mail import send_appointment_confirmation_email
 
 class HospitalViewSet(viewsets.ModelViewSet):
     queryset = Hospital.objects.all()
@@ -65,8 +61,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         """
         Créer un rendez-vous avec vérification des coordonnées utilisateur et conflits horaires
         """
-        print("🔴 DEBUG: Début création rendez-vous avec vérification utilisateur")
-        
         try:
             data = request.data
             
@@ -79,13 +73,14 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             
             # RÉCUPÉRATION DES DONNÉES DE L'UTILISATEUR CONNECTÉ
             user = request.user
-            user_profile = getattr(user, 'userprofile', None)
-            
-            print(f"🔴 DEBUG: Utilisateur connecté - {user.username}, Email: {user.email}")
-            
+            getattr(user, 'userprofile', None)
+
             # VÉRIFICATION DE LA CORRESPONDANCE DES COORDONNÉES
             patient_name = data.get('patient_name', '').strip()
-            patient_email = data.get('patient_email', '').strip().lower()
+            _raw_email = data.get('patient_email', '')
+            if isinstance(_raw_email, list):
+                _raw_email = _raw_email[0] if _raw_email else ''
+            patient_email = str(_raw_email).strip().lower()
             patient_phone = data.get('patient_phone', '').strip()
             
             # Construction du nom complet utilisateur
@@ -98,13 +93,13 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                     'error': f'Le nom doit correspondre à votre compte. Votre nom: {user_full_name}'
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            # VÉRIFICATION DE L'EMAIL
-            if patient_email != user.email.lower():
+            # E-mail de contact / envoi du reçu : libre (toute adresse valide), pas obligé d’être celle du compte
+            if not patient_email or '@' not in patient_email:
                 return Response({
                     'success': False,
-                    'error': f'L\'email doit correspondre à votre compte. Votre email: {user.email}'
+                    'error': 'Une adresse e-mail valide est requise pour recevoir la confirmation et le PDF.'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
+
             # VÉRIFICATION DU TÉLÉPHONE (si disponible dans le profil)
             if hasattr(user, 'phone_number') and user.phone_number:
                 if patient_phone != user.phone_number:
@@ -125,6 +120,10 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             try:
                 # Format attendu: "2024-01-15 14:30"
                 scheduled_datetime = datetime.strptime(scheduled_date_str, "%Y-%m-%d %H:%M")
+                if timezone.is_naive(scheduled_datetime):
+                    scheduled_datetime = timezone.make_aware(
+                        scheduled_datetime, timezone.get_current_timezone()
+                    )
             except ValueError:
                 return Response({
                     'success': False,
@@ -183,7 +182,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             try:
                 doctor = Doctor.objects.get(id=data['doctor'])
                 hospital = Hospital.objects.get(id=data['hospital'])
-                print(f"🔴 DEBUG: Docteur trouvé: {doctor.name}, Hôpital: {hospital.name}")
             except (Doctor.DoesNotExist, Hospital.DoesNotExist):
                 return Response({
                     'success': False,
@@ -196,8 +194,6 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                     'success': False,
                     'error': 'Le docteur sélectionné ne fait pas partie de cet hôpital'
                 }, status=status.HTTP_400_BAD_REQUEST)
-            
-            print("🔴 DEBUG: Toutes les validations passées")
             
             # Créer ou récupérer le patient
             patient_data = {
@@ -212,23 +208,21 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             }
             
             patient, created = Patient.objects.get_or_create(
-                email=data['patient_email'],
-                defaults=patient_data
+                email=patient_email,
+                defaults=patient_data,
             )
             
             # Mettre à jour si le patient existe déjà
             if not created:
-                patient.name = data['patient_name']
-                patient.phone_number = data['patient_phone']
+                patient.name = patient_name
+                patient.phone_number = patient_phone
                 patient.save()
-            
-            print("🔴 DEBUG: Création du rendez-vous...")
             
             # CRÉATION du rendez-vous AVEC L'UTILISATEUR ASSOCIÉ
             appointment = Appointment.objects.create(
-                patient_name=data['patient_name'],
-                patient_email=data['patient_email'],
-                patient_phone=data['patient_phone'],
+                patient_name=patient_name,
+                patient_email=patient_email,
+                patient_phone=patient_phone,
                 doctor=doctor,
                 hospital=hospital,
                 scheduled_date=scheduled_datetime,
@@ -237,24 +231,31 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                 pregnancy_week=data.get('pregnancy_week'),
                 user=user  # ASSOCIATION AVEC L'UTILISATEUR CONNECTÉ
             )
-            
-            print(f"✅ Rendez-vous créé pour l'utilisateur {user.username} - ID: {appointment.id}, Date: {appointment.appointment_date}, Position: {appointment.daily_sequence}, Prix: {appointment.price}")
-            
-            # ✅ TOUJOURS retourner Response à la fin
-            return Response({
+
+            confirmation_email_sent, email_send_error = send_appointment_confirmation_email(
+                appointment
+            )
+
+            payload = {
                 'success': True,
-                'message': 'Rendez-vous créé avec succès',
+                'message': (
+                    'Rendez-vous créé avec succès. Un e-mail de confirmation avec le reçu PDF vous a été envoyé.'
+                    if confirmation_email_sent
+                    else 'Rendez-vous créé avec succès. L’envoi de l’e-mail a échoué : téléchargez le reçu PDF sur la page de confirmation ou vérifiez la configuration SMTP (.env).'
+                ),
                 'appointment_id': appointment.id,
                 'registration_number': str(appointment.registration_number),
                 'redirect_url': f"/appointment/success/{appointment.id}/",
-            }, status=status.HTTP_201_CREATED)
+                'confirmation_email_sent': confirmation_email_sent,
+            }
+            if settings.DEBUG and not confirmation_email_sent and email_send_error:
+                payload['email_send_error'] = email_send_error
+
+            return Response(payload, status=status.HTTP_201_CREATED)
             
         except Exception as e:
-            print(f"🔴 DEBUG: Exception dans create: {str(e)}")
-            import traceback
-            print(f"🔴 DEBUG: Traceback: {traceback.format_exc()}")
-            
-            # ✅ TOUJOURS retourner Response même pour les exceptions
+            import logging
+            logging.getLogger(__name__).exception("Création rendez-vous: %s", e)
             return Response({
                 'success': False,
                 'error': f'Erreur lors de la création du rendez-vous: {str(e)}'
@@ -325,70 +326,3 @@ class PregnancyAppointmentViewSet(viewsets.ModelViewSet):
     queryset = PregnancyAppointment.objects.all()
     serializer_class = PregnancyAppointmentSerializer
     permission_classes = [AllowAny]
-
-# FONCTIONS UTILITAIRES
-
-def get_pdf_download_response(appointment):
-    """Retourne une réponse HTTP pour télécharger le PDF"""
-    try:
-        from .receipts import generate_appointment_receipt
-        
-        pdf_content = generate_appointment_receipt(appointment)
-        
-        if pdf_content:
-            response = HttpResponse(pdf_content, content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="recu_rdv_{appointment.registration_number}.pdf"'
-            return response
-        return None
-    except Exception as e:
-        print(f"❌ Erreur génération PDF: {str(e)}")
-        return None
-
-# VUES POUR LES TEMPLATES
-
-from django.views.generic import TemplateView
-from django.shortcuts import get_object_or_404
-
-@login_required
-class HomeView(TemplateView):
-    template_name = 'mapli/home.html'
-
-@login_required
-class BookAppointmentView(TemplateView):
-    template_name = 'mapli/appoint.html'
-
-@login_required
-class AboutView(TemplateView):
-    template_name = 'mapli/about.html'
-
-@login_required
-class ServicesView(TemplateView):
-    template_name = 'mapli/services.html'
-
-@login_required
-class DoctorsView(TemplateView):
-    template_name = 'mapli/doctors.html'
-
-@login_required
-class DepartmentsView(TemplateView):
-    template_name = 'mapli/departments.html'
-
-@login_required
-class PregnancyUltrasoundView(TemplateView):
-    template_name = 'mapli/pregnancy_ultrasound.html'
-
-# PAGE DE SUCCÈS
-def appointment_success(request, appointment_id):
-    """Page de confirmation après prise de rendez-vous"""
-    appointment = get_object_or_404(Appointment, id=appointment_id)
-    
-    context = {
-        'appointment': appointment
-    }
-    return render(request, 'mapli/appointment_success.html', context)
-
-# TÉLÉCHARGEMENT DU REÇU
-def download_receipt(request, appointment_id):
-    """Téléchargement du reçu PDF"""
-    appointment = get_object_or_404(Appointment, id=appointment_id)
-    return get_pdf_response(appointment)

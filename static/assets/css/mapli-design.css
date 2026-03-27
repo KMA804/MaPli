@@ -1,0 +1,920 @@
+/**
+ * MaPli — charte visuelle (après main.css + mapli-layout.css)
+ * Palette indigo–rose adoucie, espacements réguliers, mouvements discrets.
+ */
+
+:root {
+  /* Marque */
+  --mapli-brand: #5248d9;
+  --mapli-brand-dark: #4338ca;
+  --mapli-brand-light: #7c73e6;
+  --mapli-rose: #db2777;
+  --mapli-mint: #0d9488;
+  --mapli-ink: #2d3a4a;
+  --mapli-ink-strong: #1e2835;
+  --mapli-muted: #4a5568;
+  --mapli-surface: rgba(255, 255, 255, 0.9);
+  --mapli-gradient: linear-gradient(135deg, #5248d9 0%, #7c73e6 42%, #c0267e 100%);
+  --mapli-gradient-soft: linear-gradient(
+    135deg,
+    rgba(82, 72, 217, 0.09) 0%,
+    rgba(192, 38, 126, 0.05) 100%
+  );
+  --mapli-shadow: 0 18px 48px -14px rgba(67, 56, 202, 0.2);
+  --mapli-radius: 1.125rem;
+  --mapli-radius-lg: 1.5rem;
+
+  /* Alias utilisés par mapli-layout + composants */
+  --mapli-violet: var(--mapli-brand);
+  --mapli-violet-deep: var(--mapli-brand-dark);
+
+  --primary: var(--mapli-brand);
+  --primary-dark: var(--mapli-brand-dark);
+  --primary-light: var(--mapli-brand-light);
+  --primary-soft: #eef2ff;
+  --secondary: var(--mapli-rose);
+  --secondary-light: #f472b6;
+  --secondary-soft: #fce7f3;
+
+  --gradient-primary: var(--mapli-gradient);
+  --gradient-secondary: linear-gradient(135deg, #db2777 0%, #f472b6 100%);
+  --shadow-xs: 0 1px 3px rgba(67, 56, 202, 0.06);
+  --shadow-sm: 0 4px 12px rgba(67, 56, 202, 0.08);
+  --shadow-md: 0 10px 24px rgba(67, 56, 202, 0.1);
+  --shadow-lg: 0 16px 40px rgba(67, 56, 202, 0.12);
+  --shadow-xl: 0 24px 56px rgba(67, 56, 202, 0.14);
+  --shadow-2xl: var(--mapli-shadow);
+  --shadow-glow: 0 8px 32px rgba(82, 72, 217, 0.25);
+
+  --transition-smooth: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: all 0.32s cubic-bezier(0.34, 1.2, 0.64, 1);
+  --transition-elastic: var(--transition-smooth);
+
+  /* Bootstrap 5 */
+  --bs-primary: #5248d9;
+  --bs-primary-rgb: 82, 72, 217;
+  --bs-link-color: #5b52e0;
+  --bs-link-hover-color: #4338ca;
+  --bs-border-radius: var(--mapli-radius);
+  --bs-border-radius-lg: var(--mapli-radius-lg);
+
+  /* main.css */
+  --accent-color: var(--mapli-brand);
+  --primary-color: var(--mapli-brand);
+  --primary-dark: var(--mapli-brand-dark);
+  --secondary-color: var(--mapli-brand-light);
+  --accent-light: #fbcfe8;
+  --heading-color: #363b5c;
+  --nav-hover-color: var(--mapli-brand);
+  --nav-dropdown-hover-color: var(--mapli-brand);
+
+  /* Adoucit les gris hérités du layout (titres, nav) */
+  --dark: #2f3d4d;
+  --gray-900: #3d4e63;
+  --gray-800: #4a5d72;
+  --gray-700: #5c6f82;
+}
+
+/* Fond page : plus neutre, moins saturé */
+body {
+  font-feature-settings: "kern" 1, "liga" 1;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  background: linear-gradient(
+      165deg,
+      #f8fafc 0%,
+      #f1f5f9 38%,
+      #faf5ff 72%,
+      #fff1f2 100%
+    )
+    fixed !important;
+  color: var(--mapli-ink);
+}
+
+body::before {
+  opacity: 0.65 !important;
+  background: radial-gradient(
+    circle at 80% 20%,
+    rgba(82, 72, 217, 0.04) 0%,
+    transparent 45%
+  ) !important;
+}
+
+/* En-tête : lisible, effets contenus */
+.header {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border-bottom-color: rgba(82, 72, 217, 0.1) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.header::after {
+  opacity: 0.35;
+  filter: blur(3px);
+}
+
+.header.scrolled {
+  box-shadow: 0 8px 32px -8px rgba(82, 72, 217, 0.09) !important;
+}
+
+.logo:hover {
+  transform: translateY(-1px);
+}
+
+.logo-icon {
+  box-shadow: 0 8px 24px -6px rgba(82, 72, 217, 0.45) !important;
+}
+
+.logo-icon::before {
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+
+/* Logo header : texte plein (le dégradé clair était peu lisible sur fond blanc) */
+.logo-text h1 {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: var(--mapli-brand-dark) !important;
+  color: var(--mapli-brand-dark) !important;
+}
+
+.logo-text span {
+  color: var(--mapli-muted) !important;
+}
+
+/* Navigation : liens toujours lisibles */
+.header .nav-link {
+  color: var(--mapli-ink) !important;
+}
+
+.header .nav-link:hover {
+  color: var(--mapli-brand-dark) !important;
+}
+
+/* Boutons Connexion / S'inscrire : contour visible sur fond clair */
+.header .auth-buttons .btn-outline {
+  color: var(--mapli-brand-dark) !important;
+  box-shadow: inset 0 0 0 2px rgba(82, 72, 217, 0.5) !important;
+}
+
+.header .auth-buttons .btn-getstarted,
+.header .auth-buttons .btn-success {
+  color: #fff !important;
+}
+
+.header .btn-user .user-name {
+  color: var(--mapli-ink-strong) !important;
+}
+
+.header .btn-user .user-status {
+  color: var(--mapli-muted) !important;
+}
+
+/* Pied de page : thème clair, même famille de tons que le corps de page */
+.footer {
+  background: linear-gradient(
+    165deg,
+    #f8fafc 0%,
+    #f3f1ff 38%,
+    #fdf2f8 72%,
+    #f8fafc 100%
+  ) !important;
+  color: var(--mapli-ink) !important;
+  margin-top: 4rem !important;
+  border-top: 1px solid rgba(82, 72, 217, 0.1) !important;
+  box-shadow: 0 -16px 48px -24px rgba(82, 72, 217, 0.12);
+}
+
+.footer::after {
+  opacity: 0.35 !important;
+  background: radial-gradient(circle at 25% 20%, rgba(124, 115, 230, 0.08) 0%, transparent 42%),
+    radial-gradient(circle at 85% 60%, rgba(219, 39, 119, 0.06) 0%, transparent 45%) !important;
+}
+
+.footer-about p {
+  color: var(--mapli-muted) !important;
+  line-height: 1.65;
+}
+
+.footer .logo-icon {
+  background: var(--mapli-gradient) !important;
+  box-shadow: 0 10px 28px rgba(82, 72, 217, 0.28) !important;
+}
+
+.footer .logo-text .sitename {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: var(--mapli-brand-dark) !important;
+  color: var(--mapli-brand-dark) !important;
+  font-weight: 700 !important;
+}
+
+.footer .logo-text .logo-subtitle {
+  color: var(--mapli-muted) !important;
+  -webkit-text-fill-color: var(--mapli-muted) !important;
+}
+
+.footer-links h4 {
+  color: var(--mapli-ink-strong) !important;
+}
+
+.footer-links h4::after {
+  background: var(--mapli-gradient) !important;
+  box-shadow: 0 2px 12px rgba(82, 72, 217, 0.25) !important;
+}
+
+.footer-links a {
+  color: var(--mapli-ink) !important;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.footer-links a:hover {
+  color: var(--mapli-brand) !important;
+  transform: translateX(3px);
+}
+
+.footer-links a i {
+  color: var(--mapli-brand) !important;
+  opacity: 1 !important;
+}
+
+.footer-links a:hover i {
+  color: var(--mapli-rose) !important;
+}
+
+.footer-contact .contact-item,
+.footer .contact-item {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border: 1px solid rgba(82, 72, 217, 0.1) !important;
+}
+
+.footer-contact .contact-item span,
+.footer-contact .contact-item a,
+.footer .contact-item span,
+.footer .contact-item a {
+  color: var(--mapli-ink) !important;
+}
+
+.footer .contact-item:hover {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(124, 115, 230, 0.28) !important;
+  box-shadow: 0 8px 28px -12px rgba(82, 72, 217, 0.18) !important;
+}
+
+.social-links a {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(82, 72, 217, 0.12) !important;
+  color: var(--mapli-brand) !important;
+}
+
+.social-links a:hover {
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 12px 28px -8px rgba(82, 72, 217, 0.35) !important;
+}
+
+.footer-bottom {
+  background: rgba(255, 255, 255, 0.55) !important;
+  border-top: 1px solid rgba(82, 72, 217, 0.1) !important;
+  backdrop-filter: blur(12px);
+}
+
+.copyright,
+.copyright a {
+  color: var(--mapli-ink) !important;
+}
+
+.copyright strong {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: var(--mapli-brand-dark) !important;
+  color: var(--mapli-brand-dark) !important;
+}
+
+.copyright a:hover {
+  color: var(--mapli-brand) !important;
+  background: rgba(82, 72, 217, 0.08) !important;
+}
+
+.footer-newsletter {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(82, 72, 217, 0.1) !important;
+}
+
+.footer-newsletter h5 {
+  color: var(--mapli-ink-strong) !important;
+}
+
+.newsletter-form input {
+  background: #fff !important;
+  color: var(--mapli-ink) !important;
+  border: 1px solid rgba(82, 72, 217, 0.15) !important;
+}
+
+.newsletter-form input:focus {
+  background: #fff !important;
+  border-color: var(--mapli-brand) !important;
+  box-shadow: 0 0 0 3px rgba(82, 72, 217, 0.15) !important;
+}
+
+.newsletter-form button {
+  background: var(--mapli-gradient) !important;
+}
+
+.trust-badge {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(82, 72, 217, 0.1) !important;
+}
+
+.trust-badge-text {
+  color: var(--mapli-muted) !important;
+}
+
+.trust-badge-text strong {
+  color: var(--mapli-ink-strong) !important;
+}
+
+.footer::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--mapli-brand-light),
+    var(--mapli-rose),
+    var(--mapli-brand-light),
+    transparent
+  ) !important;
+}
+
+/* Boutons & formulaires (hors pages très spécifiques) */
+main .btn-primary {
+  background: var(--mapli-gradient);
+  border: none;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.55rem 1.35rem;
+  box-shadow: 0 8px 20px -6px rgba(82, 72, 217, 0.45);
+  transition: var(--transition-smooth);
+  color: #fff !important;
+}
+
+main .btn-primary:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px -8px rgba(192, 38, 126, 0.35);
+}
+
+main .form-control,
+main .form-select {
+  border-radius: 0.75rem;
+  border-color: rgba(82, 72, 217, 0.15);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+main .form-control:focus,
+main .form-select:focus {
+  border-color: var(--mapli-brand);
+  box-shadow: 0 0 0 4px rgba(82, 72, 217, 0.15);
+}
+
+main .form-control::placeholder,
+main textarea::placeholder,
+.mapli-auth-panel .form-control::placeholder {
+  color: #5c6570 !important;
+  opacity: 1 !important;
+}
+
+main .text-muted,
+small.text-muted {
+  color: var(--mapli-muted) !important;
+}
+
+/* Alertes Django / Bootstrap */
+main .alert {
+  border-radius: var(--mapli-radius);
+  border: 1px solid transparent;
+  box-shadow: 0 4px 24px -6px rgba(82, 72, 217, 0.08);
+}
+
+main .alert .alert-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.15rem;
+}
+
+main .alert .alert-message {
+  font-size: 0.9rem;
+  opacity: 1;
+  color: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .logo:hover,
+  .nav-link:hover,
+  main .btn-primary:hover {
+    transform: none;
+  }
+
+  .footer::before {
+    animation: none !important;
+  }
+}
+
+/* Titres de section */
+.section-title h2 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--mapli-ink-strong);
+}
+
+.section-title h2::after {
+  background: var(--mapli-gradient);
+  width: 64px;
+  height: 4px;
+  border-radius: 4px;
+}
+
+/* Fil d'Ariane & en-têtes de page */
+.page-title {
+  padding: 6.5rem 0 2.5rem;
+  background: var(--mapli-gradient-soft);
+  border-bottom: 1px solid rgba(82, 72, 217, 0.1);
+  position: relative;
+}
+
+.page-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(82, 72, 217, 0.28), transparent);
+}
+
+.page-title .title-wrapper h1 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: var(--mapli-brand-dark) !important;
+  color: var(--mapli-brand-dark) !important;
+}
+
+.page-title .title-wrapper p {
+  color: var(--mapli-ink);
+  font-size: 1.125rem;
+  max-width: 36rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-title .breadcrumb-item a {
+  color: var(--mapli-brand-dark);
+  text-decoration: none;
+}
+
+.page-title .breadcrumb-item a:hover {
+  color: var(--mapli-rose);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.page-title .breadcrumb-item.active {
+  color: var(--mapli-ink-strong);
+  font-weight: 600;
+}
+
+/* Hero */
+.hero.dark-background .hero-image::after {
+  background: linear-gradient(
+    125deg,
+    rgba(55, 48, 120, 0.78) 0%,
+    rgba(82, 72, 217, 0.45) 45%,
+    rgba(192, 38, 126, 0.28) 100%
+  ) !important;
+}
+
+.hero .hero-content .content-box h1 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: #fff !important;
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.45),
+    0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.hero .hero-content .content-box .badge-accent {
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  color: #fff !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.hero .hero-content .content-box .cta-group .btn.btn-primary {
+  background: var(--mapli-gradient);
+  border: none;
+  box-shadow: 0 10px 30px -8px rgba(82, 72, 217, 0.55);
+}
+
+.hero .hero-content .content-box .cta-group .btn.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow: 0 16px 40px -10px rgba(192, 38, 126, 0.45);
+}
+
+.hero .hero-content .content-box .cta-group .btn.btn-outline {
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.hero .hero-content .content-box .cta-group .btn.btn-outline:hover {
+  background: #fff;
+  color: var(--mapli-violet-deep);
+  border-color: #fff;
+}
+
+.hero .features-wrapper .feature-item {
+  background: var(--mapli-surface);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: var(--mapli-radius);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--mapli-shadow);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.hero .features-wrapper .feature-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 24px 48px -14px rgba(67, 56, 202, 0.28);
+}
+
+.hero .features-wrapper .feature-item .feature-icon {
+  background: var(--mapli-gradient);
+  color: #fff;
+}
+
+/* main.css utilisait color-mix très transparent → texte quasi invisible */
+.hero .features-wrapper .feature-item .feature-text h3 {
+  color: var(--mapli-ink-strong) !important;
+  font-weight: 700 !important;
+}
+
+.hero .features-wrapper .feature-item .feature-text p {
+  color: var(--mapli-ink) !important;
+  line-height: 1.55 !important;
+}
+
+/* Pages plein écran type « bienvenue » : fond clair au lieu du thème sombre main.css */
+main .dark-background:not(.hero) {
+  background: linear-gradient(165deg, #f1f5f9 0%, #f3f0ff 45%, #fdf2f8 100%) !important;
+}
+
+main .dark-background:not(.hero) .text-white,
+main .dark-background:not(.hero) h1,
+main .dark-background:not(.hero) .lead {
+  color: var(--mapli-ink) !important;
+}
+
+main .dark-background:not(.hero) .ai-welcome-card.bg-dark,
+main .dark-background:not(.hero) .bg-dark {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: var(--mapli-ink) !important;
+  border: 1px solid rgba(82, 72, 217, 0.12) !important;
+  box-shadow: var(--mapli-shadow);
+}
+
+main .dark-background:not(.hero) .btn-outline-light {
+  color: var(--mapli-brand) !important;
+  border-color: rgba(82, 72, 217, 0.35) !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+main .dark-background:not(.hero) .btn-outline-light:hover {
+  background: var(--mapli-gradient) !important;
+  color: #fff !important;
+  border-color: transparent !important;
+}
+
+/* Menus déroulants : ombre dans les tons de la marque */
+.header .dropdown-menu {
+  border-color: rgba(82, 72, 217, 0.12) !important;
+  box-shadow: 0 20px 50px -12px rgba(82, 72, 217, 0.18) !important;
+}
+
+.header .dropdown-item {
+  color: var(--mapli-ink) !important;
+}
+
+/* Auth */
+.mapli-auth-panel {
+  border-radius: var(--mapli-radius-lg) !important;
+  border: 1px solid rgba(82, 72, 217, 0.12) !important;
+  box-shadow: var(--mapli-shadow) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(12px);
+}
+
+.mapli-auth-panel .form-control:focus {
+  border-color: var(--mapli-violet);
+  box-shadow: 0 0 0 4px rgba(82, 72, 217, 0.18);
+}
+
+.mapli-auth-panel .btn-primary {
+  background: var(--mapli-gradient);
+  border: none;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  color: #fff !important;
+}
+
+.mapli-auth-panel .btn-primary:hover {
+  filter: brightness(1.06);
+}
+
+/* Confirmation RDV */
+.mapli-confirmation .page-title {
+  padding: 5.5rem 0 2rem;
+}
+
+.mapli-confirmation .mapli-success-shell {
+  max-width: 56rem;
+  margin: 0 auto;
+}
+
+.mapli-confirmation .mapli-success-card {
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 250, 252, 0.99) 100%);
+  border: 1px solid rgba(82, 72, 217, 0.12);
+  border-radius: var(--mapli-radius-lg);
+  box-shadow: var(--mapli-shadow);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  position: relative;
+}
+
+.mapli-confirmation .mapli-success-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--mapli-gradient);
+}
+
+.mapli-confirmation .mapli-success-icon {
+  width: 6.5rem;
+  height: 6.5rem;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #14b8a6 0%, #2dd4bf 50%, #0d9488 100%);
+  color: #fff;
+  font-size: 3rem;
+  box-shadow: 0 16px 40px -10px rgba(13, 148, 136, 0.45);
+  animation: mapli-pop 0.55s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+@keyframes mapli-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.mapli-confirmation .mapli-success-title {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  color: #0f766e !important;
+  background: none !important;
+  -webkit-text-fill-color: #0f766e !important;
+}
+
+.mapli-confirmation .mapli-reg-box {
+  background: var(--mapli-gradient-soft);
+  border: 1px solid rgba(82, 72, 217, 0.16);
+  border-radius: var(--mapli-radius);
+  padding: 1.75rem 1.5rem;
+}
+
+.mapli-confirmation .mapli-reg-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mapli-muted);
+  margin-bottom: 0.5rem;
+}
+
+.mapli-confirmation .mapli-reg-code {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: clamp(1.15rem, 3vw, 1.65rem);
+  font-weight: 700;
+  color: var(--mapli-brand-dark) !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--mapli-brand-dark) !important;
+  word-break: break-all;
+  letter-spacing: 0.02em;
+}
+
+.mapli-confirmation .mapli-info-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(82, 72, 217, 0.1);
+  border-radius: var(--mapli-radius);
+  padding: 1.5rem;
+  height: 100%;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mapli-confirmation .mapli-info-card:hover {
+  border-color: rgba(82, 72, 217, 0.22);
+  box-shadow: 0 12px 36px -12px rgba(67, 56, 202, 0.18);
+}
+
+.mapli-confirmation .mapli-info-card h5 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  font-size: 1.2rem;
+  color: var(--mapli-ink);
+}
+
+.mapli-confirmation .mapli-info-card .mapli-icon-round {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(82, 72, 217, 0.1);
+  color: var(--mapli-violet-deep);
+  flex-shrink: 0;
+}
+
+.mapli-confirmation .mapli-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  font-size: 0.95rem;
+}
+
+.mapli-confirmation .mapli-row:last-child {
+  border-bottom: none;
+}
+
+.mapli-confirmation .mapli-actions .btn-primary {
+  background: var(--mapli-gradient);
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  padding: 0.85rem 1.75rem;
+  box-shadow: 0 10px 28px -10px rgba(82, 72, 217, 0.4);
+}
+
+.mapli-confirmation .mapli-actions .btn-primary:hover {
+  filter: brightness(1.05);
+  transform: translateY(-2px);
+}
+
+.mapli-confirmation .mapli-actions .btn-outline-secondary {
+  border-radius: 999px;
+  border: 2px solid var(--mapli-brand);
+  color: var(--mapli-violet-deep);
+  font-weight: 600;
+  padding: 0.85rem 1.75rem;
+  background: transparent;
+}
+
+.mapli-confirmation .mapli-actions .btn-outline-secondary:hover {
+  background: var(--mapli-gradient);
+  border-color: transparent;
+  color: #fff;
+}
+
+.mapli-confirmation .mapli-tips {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(251, 191, 36, 0.05) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--mapli-radius);
+  padding: 1.5rem 1.5rem 1.25rem;
+}
+
+.mapli-confirmation .mapli-tips h5 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  color: var(--mapli-ink);
+}
+
+.mapli-confirmation .mapli-tip-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.45rem 0;
+  color: var(--mapli-ink);
+  font-size: 0.95rem;
+}
+
+.mapli-confirmation .mapli-tip-line i {
+  color: var(--mapli-mint);
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 576px) {
+  .mapli-confirmation .mapli-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Rythme vertical */
+main > .section:not(.page-title) {
+  padding-top: 2.5rem;
+  padding-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+  main > .section:not(.page-title) {
+    padding-top: 1.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .page-title {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .page-title .title-wrapper h1 {
+    font-size: clamp(1.65rem, 6vw, 2.25rem) !important;
+  }
+}
+
+/* Page RDV */
+.appointmnet.appointment.section .appointment-form-wrapper {
+  border: 1px solid rgba(82, 72, 217, 0.12);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--mapli-shadow);
+  border-radius: var(--mapli-radius-lg);
+}
+
+.appointmnet.appointment.section .appointment-info h3 {
+  font-family: "Playfair Display", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--mapli-ink);
+}
+
+@media (max-width: 991px) {
+  .appointmnet.appointment.section .row.gy-4 {
+    --bs-gutter-y: 2rem;
+  }
+}
+
+/* Cartes & tableaux */
+main .card {
+  border-radius: var(--mapli-radius);
+  border-color: rgba(82, 72, 217, 0.09);
+  box-shadow: 0 2px 16px -4px rgba(15, 23, 42, 0.06);
+  transition: box-shadow 0.25s ease;
+}
+
+main .card:hover {
+  box-shadow: 0 12px 32px -8px rgba(67, 56, 202, 0.1);
+}
+
+main .table {
+  --bs-table-hover-bg: rgba(82, 72, 217, 0.05);
+}
+
+/* Tableaux de bord & listes */
+main .dashboard-card,
+main .stats-card {
+  border-radius: var(--mapli-radius);
+}

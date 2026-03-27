@@ -53,8 +53,8 @@
     </div>
 </div>
 
-<!-- Appointment Section -->
-<section class="appointment section">
+<!-- Appointment Section (appointmnet = classe héritée main.css, typo historique) -->
+<section class="appointmnet appointment section">
     <div class="container">
         <div class="row gy-4">
 
@@ -136,8 +136,7 @@
                                 <h5 class="mb-3">Informations du patient</h5>
                                 <div class="alert alert-info mb-3">
                                     <i class="bi bi-info-circle-fill me-2"></i>
-                                    Vos informations personnelles sont protégées et non modifiables pour des raisons de
-                                    sécurité.
+                                    Le nom et le téléphone viennent de votre compte. Vous pouvez indiquer <strong>n’importe quelle adresse e-mail</strong> pour y recevoir le reçu et la confirmation.
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6">
@@ -147,9 +146,10 @@
                                     </div>
 
                                     <div class="col-md-6">
+                                        <label class="form-label small text-muted mb-1">E-mail pour le reçu PDF</label>
                                         <input type="email" name="patient_email" class="form-control"
-                                            placeholder="Votre Email" required readonly
-                                            style="background-color: #f8f9fa; cursor: not-allowed; opacity: 0.9;">
+                                            placeholder="ex. autre.adresse@gmail.com" required
+                                            autocomplete="email">
                                     </div>
 
                                     <div class="col-md-6 mt-3">
@@ -1316,17 +1316,13 @@
     const stepAdditionalInfo = document.getElementById('step-additional-info');
     const formProgress = document.getElementById('formProgress');
 
-    // ==================== PRÉ-REMPLISSAGE AUTOMATIQUE AVEC VERROUILLAGE ====================
+    // ==================== PRÉ-REMPLISSAGE : nom/tél. verrouillés, e-mail modifiable ====================
 
     function prefillAndLockUserData() {
-        console.log('🔒 Verrouillage des données utilisateur...');
-
-        // Récupérer les champs
         const nameField = document.querySelector('input[name="patient_name"]');
         const emailField = document.querySelector('input[name="patient_email"]');
         const phoneField = document.querySelector('input[name="patient_phone"]');
 
-        // Récupérer les données utilisateur depuis Django
         let firstName = "{{ user.first_name|default:'' }}";
         let lastName = "{{ user.last_name|default:'' }}";
         let fullName = (firstName + ' ' + lastName).trim();
@@ -1339,41 +1335,31 @@
             fullName = "{{ user.username|default:'Utilisateur' }}";
         }
 
-        // Récupération du téléphone DIRECTEMENT depuis l'utilisateur
         let userPhone = "{{ user.phone_number|default:'' }}";
-
-        // Debug
-        console.log('📞 Téléphone brut depuis Django:', "{{ user.phone_number|default:'NON DEFINI' }}");
-        console.log('📞 Téléphone après traitement:', userPhone);
+        const accountEmail = ("{{ user.email|default:'' }}").trim();
 
         const userData = {
             name: fullName || 'Nom non disponible',
-            email: "{{ user.email|default:'' }}" || 'email@non.disponible',
+            email: accountEmail,
             phone: userPhone || 'Numéro non renseigné'
         };
 
-        console.log('📋 Données utilisateur récupérées:', userData);
-
-        // Pré-remplir et verrouiller les champs
         if (nameField) {
             nameField.value = userData.name;
             nameField.readOnly = true;
-            console.log('👤 Nom rempli:', nameField.value);
         }
 
         if (emailField) {
-            emailField.value = userData.email;
-            emailField.readOnly = true;
-            console.log('📧 Email rempli:', emailField.value);
+            if (userData.email) {
+                emailField.value = userData.email;
+            }
+            emailField.readOnly = false;
         }
 
         if (phoneField) {
             phoneField.value = userData.phone;
             phoneField.readOnly = true;
-            console.log('📞 Téléphone rempli:', phoneField.value);
         }
-
-        console.log('✅ Champs verrouillés avec succès');
     }
 
     // ==================== INITIALISATION ====================
@@ -1636,48 +1622,22 @@
         }
     }
 
-    // Charger les disponibilités depuis l'API
+    // Calendrier : pas d’endpoint /availability/ (404). On désactive seulement les week-ends ;
+    // les créneaux réels viennent de /available_time_slots/ après choix de la date.
     async function loadAvailability(doctorId) {
         if (!doctorId) return;
 
-        try {
-            console.log('📅 Chargement des disponibilités pour le médecin:', doctorId);
+        availableDates = [];
+        bookedDates = [];
 
-            const response = await fetch(`${API_BASE_URL}/appointments/availability/?doctor_id=${doctorId}`);
-
-            if (!response.ok) {
-                throw new Error('Erreur chargement disponibilités');
-            }
-
-            const data = await response.json();
-            console.log('📅 Données de disponibilité:', data);
-
-            // Transformer les données pour Flatpickr
-            availableDates = [];
-            bookedDates = [];
-
-            if (data.available_slots) {
-                // data.available_slots = { "2026-03-15": ["09:00", "10:00"], ... }
-                Object.keys(data.available_slots).forEach(date => {
-                    availableDates.push(date);
-                });
-            }
-
-            if (data.booked_slots) {
-                bookedDates = data.booked_slots.map(slot => slot.date);
-            }
-
-            console.log('✅ Dates disponibles chargées:', availableDates);
-            console.log('✅ Dates déjà réservées:', bookedDates);
-
-            // Mettre à jour le calendrier
-            if (datePicker) {
-                datePicker.set('enable', availableDates);
-                datePicker.redraw();
-            }
-
-        } catch (error) {
-            console.error('❌ Erreur chargement disponibilités:', error);
+        if (datePicker) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            datePicker.set('disable', [
+                (d) => d.getDay() === 0 || d.getDay() === 6,
+                (d) => d < today
+            ]);
+            datePicker.redraw();
         }
     }
 
@@ -1947,8 +1907,13 @@
         resetSubmitButton();
     }
 
-    function showSuccess(message = 'Rendez-vous créé avec succès!') {
-        successAlert.querySelector('strong').textContent = message;
+    function showSuccess(message = 'Rendez-vous créé avec succès !') {
+        const titleEl = successAlert.querySelector('.alert-title');
+        const msgEl = successAlert.querySelector('.alert-message');
+        if (titleEl && msgEl) {
+            titleEl.textContent = 'Succès !';
+            msgEl.textContent = message;
+        }
         successAlert.style.display = 'block';
         successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -2069,15 +2034,20 @@
 
     function handleSuccess(result) {
         console.log('✅ Succès:', result);
-        showSuccess(result.message || 'Rendez-vous créé avec succès!');
+        if (result.email_send_error) {
+            console.warn('[email] Détail (mode DEBUG):', result.email_send_error);
+        }
+        showSuccess(result.message || 'Rendez-vous créé avec succès !');
 
         setTimeout(() => {
             resetForm();
         }, 2000);
 
-        if (result.appointment_id) {
+        const aid = result.appointment_id;
+        if (aid) {
+            const es = result.confirmation_email_sent === true ? '1' : '0';
             setTimeout(() => {
-                window.location.href = `/appointment/success/${result.appointment_id}/`;
+                window.location.href = `/appointment/success/${aid}/?email_sent=${es}`;
             }, 1500);
         } else if (result.redirect_url) {
             setTimeout(() => {
@@ -2093,6 +2063,8 @@
 
         if (result.error) {
             errorMessage = result.error;
+        } else if (result.email_send_error) {
+            errorMessage = result.email_send_error;
         } else if (result.detail) {
             errorMessage = result.detail;
         } else if (result.message) {

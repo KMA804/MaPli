@@ -1,32 +1,29 @@
-static/
 # Python
-*.pyc
 __pycache__/
+*.py[cod]
 *.pyo
 *.pyd
 
-# Base de données
+# Environnement / secrets (jamais versionner)
+.env
+.env.*
+venv/
+env/
+myenv/
+
+# Django : fichiers générés ou locaux uniquement
+staticfiles/
+media/
 *.sqlite3
 *.db
 
-# Environnement virtuel
-env/
-venv/
-.env
-myenv/
-env/
-.env.local
+# Données locales sensibles
+data.json
 
-# Django static files (collectés)
-staticfiles/
-/media/
-
-# Fichiers de l'IDE
+# IDE / OS
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Fichiers système
 Thumbs.db
 .DS_Store

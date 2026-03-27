@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render, get_object_or_404
 from .receipts import get_pdf_response
 from ..models import Appointment
@@ -5,13 +6,19 @@ from ..models import Appointment
 def appointment_success(request, appointment_id):
     """Page de confirmation après prise de rendez-vous"""
     appointment = get_object_or_404(Appointment, id=appointment_id)
-    
-    # Envoyer l'email de confirmation
-    from .mail import send_appointment_confirmation_email
-    send_appointment_confirmation_email(appointment)
-    
+
+    param = request.GET.get("email_sent")
+    if param == "1":
+        confirmation_email_sent = True
+    elif param == "0":
+        confirmation_email_sent = False
+    else:
+        confirmation_email_sent = appointment.receipt_sent
+
     context = {
-        'appointment': appointment
+        "appointment": appointment,
+        "confirmation_email_sent": confirmation_email_sent,
+        "show_dev_email_hint": settings.DEBUG and not confirmation_email_sent,
     }
     return render(request, 'mapli/appointment_success.html', context)
 

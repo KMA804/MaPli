@@ -12,11 +12,41 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+import sys
 import dj_database_url  # Nouvel import pour Render
 from django.utils.translation import gettext_lazy as _
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Évite UnicodeDecodeError avec psycopg2 sous Windows (messages serveur / locale)
+os.environ.setdefault("PGCLIENTENCODING", "UTF8")
+
+
+def _load_local_dotenv():
+    path = BASE_DIR / ".env"
+    if not path.is_file():
+        return
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return
+    try:
+        load_dotenv(path, encoding="utf-8-sig")
+    except UnicodeDecodeError:
+        # Fichier .env sauvegardé en ANSI (Notepad) sous Windows
+        load_dotenv(path, encoding="cp1252")
+
+
+_load_local_dotenv()
+
+
+def _env_strip(key, default=""):
+    v = os.environ.get(key, default)
+    if v is None:
+        return default
+    return str(v).strip()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -77,7 +107,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'mere.wsgi.application'
-
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 # Configuration pour Render avec PostgreSQL
@@ -103,6 +132,7 @@ else:
             'PORT': '5432',
         }
     }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -168,19 +198,147 @@ LOGIN_URL = 'index'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'index'
 
-# Configuration Email
-if DEBUG:
-    # En développement : affiche les emails dans la console
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# ============================================================================
+# EMAIL CONFIGURATION - Configured by AI Assistant
+# ============================================================================
+# For Gmail, use App Password (not your regular Gmail password)
+# Generate App Password at: https://myaccount.google.com/apppasswords
+# 
+# To set up:
+# 1. Create a .env file in your project root
+# 2. Add these lines:
+#    EMAIL_HOST_USER=your-email@gmail.com
+#    EMAIL_HOST_PASSWORD=xxxx xxxx xxxx xxxx  (16-char app password)
+#    DEFAULT_FROM_EMAIL=your-email@gmail.com
+# 
+# For development without .env, emails will be printed to console
+# For production with .env, real emails will be sent via Gmail SMTP
+# ============================================================================
+
+# Email backend configuration
+# Uses console backend in development (DEBUG=True) if no SMTP credentials
+# Uses SMTP in production (DEBUG=False) or if credentials are provided
+_default_console = 'django.core.mail.backends.console.EmailBackend'
+_default_smtp = 'django.core.mail.backends.smtp.EmailBackend'
+_smtp_configured = bool(_env_strip("EMAIL_HOST_USER") and _env_strip("EMAIL_HOST_PASSWORD"))
+
+# Production sans SMTP : ne pas bloquer le demarrage (Render, deploiements partiels)
+if not DEBUG and not _smtp_configured:
+    import warnings
+    warnings.warn(
+        "EMAIL_HOST_USER / EMAIL_HOST_PASSWORD absents : aucun e-mail ne pourra partir en production.",
+        RuntimeWarning,
+        stacklevel=1,
+    )
+
+# SMTP : ne jamais utiliser le backend Django brut sous Windows / OpenSSL strict (erreurs SSL vers Gmail).
+# Si .env contient EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend, on remplace par CertifiEmailBackend.
+_vanilla_smtp_backend = "django.core.mail.backends.smtp.emailbackend"
+_explicit_email_backend = _env_strip("EMAIL_BACKEND")
+
+
+def _resolve_email_backend():
+    if _explicit_email_backend:
+        if _explicit_email_backend.lower() == _vanilla_smtp_backend:
+            try:
+                import certifi  # noqa: F401
+
+                return "mapli.mail_backend.CertifiEmailBackend"
+            except ImportError:
+                return _default_smtp
+        return _explicit_email_backend
+    if _smtp_configured:
+        try:
+            import certifi  # noqa: F401
+
+            return "mapli.mail_backend.CertifiEmailBackend"
+        except ImportError:
+            return _default_smtp
+    return _default_console
+
+
+EMAIL_BACKEND = _resolve_email_backend()
+
+# Gmail SMTP settings (default)
+EMAIL_HOST = _env_strip("EMAIL_HOST") or "smtp.gmail.com"
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'true').lower() in ('1', 'true', 'yes')
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'false').lower() in ('1', 'true', 'yes')
+
+# Credentials from .env file (strip : espaces autour des mots de passe d'application Gmail)
+EMAIL_HOST_USER = _env_strip("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = _env_strip("EMAIL_HOST_PASSWORD")
+_raw_default_from = _env_strip("DEFAULT_FROM_EMAIL")
+
+# Gmail SMTP : l'en-tête « From » doit correspondre au compte authentifié, sinon échec ou spam.
+# Render fournissait noreply@meditrust.maternite avec un compte Gmail — incohérent.
+if "gmail.com" in EMAIL_HOST.lower() and EMAIL_HOST_USER:
+    if _raw_default_from and "@gmail.com" in _raw_default_from.lower():
+        DEFAULT_FROM_EMAIL = _raw_default_from
+    else:
+        DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 else:
-    # En production : utilise un serveur SMTP
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_PORT = 587
-    EMAIL_USE_TLS = True
-    EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-    EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
-    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@meditrust.maternite')
+    DEFAULT_FROM_EMAIL = _raw_default_from or EMAIL_HOST_USER or "noreply@meditrust.maternite"
+
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+# Email timeout and security
+EMAIL_TIMEOUT = int(os.environ.get('EMAIL_TIMEOUT', '30'))
+EMAIL_SSL_CERTFILE = None
+EMAIL_SSL_KEYFILE = None
+
+# Windows + antivirus (inspection TLS) : certifi échoue souvent (self-signed in chain).
+# .env : EMAIL_SMTP_INSECURE_TLS=1  ou 0 / false pour forcer la vérif stricte.
+_insecure_tls_raw = _env_strip("EMAIL_SMTP_INSECURE_TLS", "").lower()
+if _insecure_tls_raw in ("0", "false", "no", "off"):
+    EMAIL_SMTP_INSECURE_TLS = False
+elif _insecure_tls_raw in ("1", "true", "yes", "on"):
+    EMAIL_SMTP_INSECURE_TLS = True
+elif DEBUG and sys.platform == "win32" and _smtp_configured:
+    # Dev local Windows : sans ça, STARTTLS vers Gmail casse souvent (Kaspersky, etc.)
+    EMAIL_SMTP_INSECURE_TLS = True
+else:
+    EMAIL_SMTP_INSECURE_TLS = False
+
+# BCC optionnel pour les confirmations RDV (ex. archive admin). Permet de voir le champ « To » réel dans la copie.
+_raw_confirm_bcc = _env_strip("EMAIL_CONFIRMATION_BCC", "")
+EMAIL_CONFIRMATION_BCC = [
+    x.strip().lower()
+    for x in _raw_confirm_bcc.split(",")
+    if x.strip() and "@" in x.strip()
+]
+
+# Logs ASCII uniquement (evite UnicodeEncodeError au demarrage sur Windows cp1252)
+if DEBUG and _smtp_configured:
+    print(f"[email] SMTP actif: host={EMAIL_HOST!r} user={EMAIL_HOST_USER!r} from={DEFAULT_FROM_EMAIL!r}")
+    if EMAIL_SMTP_INSECURE_TLS:
+        if _insecure_tls_raw:
+            print("[email] EMAIL_SMTP_INSECURE_TLS : verification certificat SMTP desactivee (.env)")
+        else:
+            print(
+                "[email] Windows+DEBUG : verification certificat SMTP desactivee par defaut "
+                "(antivirus). Mettez EMAIL_SMTP_INSECURE_TLS=0 dans .env pour forcer la verif stricte."
+            )
+elif DEBUG:
+    print("[email] Backend console: les mails ne partent pas sur Internet (voir terminal).")
+elif not DEBUG and _smtp_configured:
+    print(f"[email] Production SMTP: host={EMAIL_HOST!r} user={EMAIL_HOST_USER!r}")
+
+if (
+    DEBUG
+    and _smtp_configured
+    and sys.platform == "win32"
+    and not EMAIL_SMTP_INSECURE_TLS
+    and "CertifiEmailBackend" in EMAIL_BACKEND
+):
+    print(
+        "[email] Si vous voyez encore une erreur SSL (self-signed / Basic Constraints), "
+        "ajoutez dans .env : EMAIL_SMTP_INSECURE_TLS=1  (antivirus / inspection TLS)."
+    )
+
+# ============================================================================
+# End Email Configuration
+# ============================================================================
 
 # Security settings for production
 if not DEBUG:
